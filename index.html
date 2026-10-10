@@ -1,0 +1,1270 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Sismos de Panamá</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500..800&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+<style>
+/* Concepto: panel de trabajo de sismología. Lista y gráfico de la secuencia a la izquierda, mapa vectorial de Panamá a la derecha con la ficha del sismo debajo. Los rojos y ámbares se reservan para la magnitud; el verde azulado es solo interfaz. */
+:root {
+  --fondo: #edf1f2;
+  --superficie: #f8fafa;
+  --superficie-elevada: #ffffff;
+  --tinta: #13222a;
+  --tinta-suave: #55656d;
+  --linea: #d4dde0;
+  --linea-fuerte: #b5c2c7;
+  --acento: #0b6b78;
+  --acento-suave: #d9ecef;
+  --sobre-acento: #ffffff;
+  --mar: #d2e3e9;
+  --tierra: #eaefe4;
+  --tierra-vecina: #e1e6e6;
+  --frontera: #8fa3a9;
+  --frontera-suave: #b9c6ca;
+  --magnitud-4: #d99a2b;
+  --magnitud-5: #e26f2c;
+  --magnitud-6: #c8372d;
+  --magnitud-7: #7c1233;
+  --alerta-verde: #2e8b57;
+  --alerta-amarilla: #b99200;
+  --alerta-naranja: #d9701b;
+  --alerta-roja: #c0302b;
+  --sombra: 0 1px 2px rgba(19, 34, 42, 0.08), 0 6px 18px rgba(19, 34, 42, 0.1);
+  --fuente-titulo: "Bricolage Grotesque", "Avenir Next", "Segoe UI", sans-serif;
+  --fuente-texto: "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --fuente-datos: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --fondo: #0d161a;
+    --superficie: #131f24;
+    --superficie-elevada: #1a2a30;
+    --tinta: #e6eef0;
+    --tinta-suave: #93a5ac;
+    --linea: #263840;
+    --linea-fuerte: #35505a;
+    --acento: #4fc3d1;
+    --acento-suave: #12353b;
+    --sobre-acento: #06262b;
+    --mar: #0e2a33;
+    --tierra: #1c2d2e;
+    --tierra-vecina: #162327;
+    --frontera: #5a7981;
+    --frontera-suave: #2c444b;
+    --magnitud-4: #f2bc52;
+    --magnitud-5: #f58a47;
+    --magnitud-6: #f0584b;
+    --magnitud-7: #e43d7c;
+    --alerta-verde: #4cc38a;
+    --alerta-amarilla: #e8c547;
+    --alerta-naranja: #f29b4b;
+    --alerta-roja: #f0584b;
+    --sombra: 0 1px 2px rgba(0, 0, 0, 0.4), 0 6px 18px rgba(0, 0, 0, 0.35);
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --fondo: #0d161a;
+  --superficie: #131f24;
+  --superficie-elevada: #1a2a30;
+  --tinta: #e6eef0;
+  --tinta-suave: #93a5ac;
+  --linea: #263840;
+  --linea-fuerte: #35505a;
+  --acento: #4fc3d1;
+  --acento-suave: #12353b;
+  --sobre-acento: #06262b;
+  --mar: #0e2a33;
+  --tierra: #1c2d2e;
+  --tierra-vecina: #162327;
+  --frontera: #5a7981;
+  --frontera-suave: #2c444b;
+  --magnitud-4: #f2bc52;
+  --magnitud-5: #f58a47;
+  --magnitud-6: #f0584b;
+  --magnitud-7: #e43d7c;
+  --alerta-verde: #4cc38a;
+  --alerta-amarilla: #e8c547;
+  --alerta-naranja: #f29b4b;
+  --alerta-roja: #f0584b;
+  --sombra: 0 1px 2px rgba(0, 0, 0, 0.4), 0 6px 18px rgba(0, 0, 0, 0.35);
+  color-scheme: dark;
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+html { height: 100%; box-sizing: border-box; }
+body { height: 100%; background: var(--fondo); color: var(--tinta); font: 14px/1.45 var(--fuente-texto); }
+button { font: inherit; color: inherit; cursor: pointer; }
+button:focus-visible, select:focus-visible, [tabindex]:focus-visible { outline: 2px solid var(--acento); outline-offset: 2px; }
+
+.aplicacion { height: 100%; display: grid; grid-template-rows: auto auto minmax(0, 1fr); gap: 10px; padding-block: 12px; padding-inline: 16px; min-width: 0; }
+
+/* Encabezado */
+.encabezado { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 8px 16px; }
+.encabezado h1 { margin: 0; font: 700 clamp(21px, 3.2vw, 28px) / 1.05 var(--fuente-titulo); letter-spacing: -0.015em; text-wrap: balance; }
+.subtitulo { margin: 4px 0 0; color: var(--tinta-suave); font-size: 13px; }
+.estado-sincronizacion { display: inline-flex; align-items: center; gap: 8px; padding: 5px 11px; border: 1px solid var(--linea); border-radius: 999px; background: var(--superficie); color: var(--tinta-suave); font: 500 12px var(--fuente-datos); }
+.punto-estado { width: 8px; height: 8px; border-radius: 50%; background: var(--linea-fuerte); flex: none; }
+.estado-sincronizacion[data-nivel="reciente"] .punto-estado { background: var(--alerta-verde); }
+.estado-sincronizacion[data-nivel="atrasado"] .punto-estado { background: var(--alerta-amarilla); }
+.estado-sincronizacion[data-nivel="antiguo"] .punto-estado { background: var(--alerta-roja); }
+
+/* Resumen */
+.resumen { display: flex; flex-wrap: wrap; gap: 4px 20px; margin: 0; padding: 0; list-style: none; font-size: 13px; color: var(--tinta-suave); }
+.resumen strong { color: var(--tinta); font: 500 14px var(--fuente-datos); font-variant-numeric: tabular-nums; }
+
+/* Pestañas móviles */
+.pestanas { display: none; gap: 4px; padding: 3px; border: 1px solid var(--linea); border-radius: 10px; background: var(--superficie); }
+.pestanas button { flex: 1; padding: 7px 10px; border: 0; border-radius: 7px; background: transparent; font-weight: 500; color: var(--tinta-suave); }
+.pestanas button[aria-pressed="true"] { background: var(--acento); color: var(--sobre-acento); }
+
+/* Cuerpo */
+.cuerpo { display: grid; grid-template-columns: minmax(300px, 380px) minmax(0, 1fr); grid-template-rows: minmax(0, 1fr); gap: 12px; min-height: 0; }
+.panel { background: var(--superficie); border: 1px solid var(--linea); border-radius: 10px; min-height: 0; min-width: 0; }
+.panel-lista { display: flex; flex-direction: column; overflow: hidden; }
+.panel-mapa { display: flex; flex-direction: column; gap: 12px; border: 0; background: transparent; }
+
+.bloque-grafico { padding: 10px 12px 6px; border-bottom: 1px solid var(--linea); }
+.titulo-seccion { margin: 0 0 4px; font: 600 11px var(--fuente-texto); letter-spacing: 0.08em; text-transform: uppercase; color: var(--tinta-suave); }
+.grafico-secuencia { width: 100%; min-height: 112px; }
+.grafico-secuencia svg { display: block; }
+.grafico-secuencia .linea-rejilla { stroke: var(--linea); stroke-width: 1; }
+.grafico-secuencia text { fill: var(--tinta-suave); font: 400 10px var(--fuente-datos); }
+.grafico-secuencia .tallo { stroke: var(--color-clase); stroke-width: 1.6; }
+.grafico-secuencia .cabeza { fill: var(--color-clase); stroke: var(--superficie); stroke-width: 1.5; }
+.grafico-secuencia .zona-click { stroke: transparent; stroke-width: 14; cursor: pointer; }
+.grafico-secuencia .seleccionado { stroke: var(--tinta); stroke-width: 2; fill: var(--color-clase); }
+
+.barra-filtros { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; padding: 8px 12px; border-bottom: 1px solid var(--linea); }
+.filtro { padding: 4px 10px; border: 1px solid var(--linea-fuerte); border-radius: 999px; background: transparent; font-size: 12px; font-weight: 500; }
+.filtro[aria-pressed="true"] { background: var(--acento-suave); border-color: var(--acento); color: var(--tinta); }
+.selector-orden { margin-inline-start: auto; padding: 4px 6px; border: 1px solid var(--linea-fuerte); border-radius: 6px; background: var(--superficie-elevada); color: var(--tinta); font-size: 12px; }
+.conteo-lista { padding: 6px 12px 0; margin: 0; font-size: 12px; color: var(--tinta-suave); }
+
+.lista-sismos { flex: 1 1 auto; min-height: 120px; margin: 0; padding: 4px 0 8px; list-style: none; overflow-y: auto; overscroll-behavior: contain; }
+.lista-sismos li { margin: 0; }
+.sismo { width: 100%; display: grid; grid-template-columns: 52px minmax(0, 1fr) auto; align-items: center; gap: 10px; padding: 8px 12px 8px 9px; border: 0; border-left: 4px solid var(--color-clase); border-bottom: 1px solid var(--linea); background: transparent; text-align: start; }
+.sismo:hover { background: var(--acento-suave); }
+.sismo[aria-current="true"] { background: var(--acento-suave); box-shadow: inset 0 0 0 1px var(--acento); }
+.sismo-magnitud { font: 700 22px / 1 var(--fuente-titulo); font-variant-numeric: tabular-nums; }
+.sismo-texto { display: flex; flex-direction: column; min-width: 0; }
+.sismo-lugar { font-weight: 500; overflow-wrap: anywhere; }
+.sismo-datos { font: 400 12px var(--fuente-datos); color: var(--tinta-suave); }
+.etiqueta-principal { padding: 2px 7px; border-radius: 4px; background: var(--magnitud-7); color: #ffffff; font: 600 10px var(--fuente-texto); letter-spacing: 0.06em; text-transform: uppercase; }
+:root[data-theme="dark"] .etiqueta-principal { color: #1a0a10; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .etiqueta-principal { color: #1a0a10; } }
+.mensaje-vacio { margin: 0; padding: 18px 14px; color: var(--tinta-suave); }
+
+[data-clase="4"] { --color-clase: var(--magnitud-4); }
+[data-clase="5"] { --color-clase: var(--magnitud-5); }
+[data-clase="6"] { --color-clase: var(--magnitud-6); }
+[data-clase="7"] { --color-clase: var(--magnitud-7); }
+
+/* Mapa */
+.contenedor-mapa { position: relative; flex: 1 1 0; min-height: 260px; border: 1px solid var(--linea); border-radius: 10px; overflow: hidden; background: var(--mar); }
+.svg-mapa { position: absolute; inset: 0; display: block; width: 100%; height: 100%; touch-action: none; user-select: none; -webkit-user-select: none; cursor: grab; }
+.svg-mapa:active { cursor: grabbing; }
+.vecino { fill: var(--tierra-vecina); stroke: var(--frontera-suave); stroke-width: 0.8; vector-effect: non-scaling-stroke; }
+.division { fill: var(--tierra); stroke: var(--frontera); stroke-width: 0.9; stroke-linejoin: round; vector-effect: non-scaling-stroke; }
+.division:hover { fill: color-mix(in srgb, var(--tierra) 80%, var(--acento)); }
+.rotulo { font-family: var(--fuente-texto); fill: var(--tinta-suave); paint-order: stroke; stroke: var(--halo, var(--tierra)); stroke-linejoin: round; pointer-events: none; }
+.rotulo-provincia { font-weight: 500; letter-spacing: 0.02em; }
+.rotulo-pais { font-weight: 600; letter-spacing: 0.18em; text-transform: uppercase; fill: var(--frontera); stroke: none; }
+.rotulo-mar { font-style: italic; letter-spacing: 0.12em; fill: color-mix(in srgb, var(--tinta-suave) 80%, var(--mar)); stroke: none; }
+.punto-ciudad { fill: var(--tinta); stroke: var(--superficie-elevada); stroke-width: 1.2; vector-effect: non-scaling-stroke; pointer-events: none; }
+.rotulo-ciudad { fill: var(--tinta); font-weight: 500; stroke: var(--tierra); }
+.sismo-mapa { fill: var(--color-clase); fill-opacity: 0.72; stroke: var(--color-clase); stroke-width: 1.4; vector-effect: non-scaling-stroke; cursor: pointer; }
+.sismo-mapa:hover { fill-opacity: 0.95; }
+.anillo-seleccion { fill: none; stroke: var(--tinta); stroke-width: 2.4; vector-effect: non-scaling-stroke; pointer-events: none; }
+.onda-principal { fill: none; stroke: var(--magnitud-7); stroke-width: 2; vector-effect: non-scaling-stroke; pointer-events: none; transform-box: fill-box; transform-origin: center; animation: onda 2.8s ease-out infinite; }
+@keyframes onda { from { transform: scale(1); opacity: 0.7; } to { transform: scale(3); opacity: 0; } }
+
+.controles-mapa { position: absolute; top: 10px; left: 10px; display: flex; flex-direction: column; gap: 6px; }
+.grupo-botones { display: flex; flex-direction: column; border: 1px solid var(--linea-fuerte); border-radius: 8px; overflow: hidden; background: var(--superficie-elevada); box-shadow: var(--sombra); }
+.grupo-botones button { width: 34px; height: 34px; border: 0; background: transparent; font-size: 18px; line-height: 1; }
+.grupo-botones button + button { border-top: 1px solid var(--linea); }
+.grupo-botones button:hover { background: var(--acento-suave); }
+.boton-texto { padding: 7px 10px; border: 1px solid var(--linea-fuerte); border-radius: 8px; background: var(--superficie-elevada); box-shadow: var(--sombra); font-size: 12px; font-weight: 500; text-align: start; }
+.boton-texto:hover { background: var(--acento-suave); }
+
+.leyenda-mapa { position: absolute; top: 10px; right: 10px; padding: 8px 10px; border: 1px solid var(--linea-fuerte); border-radius: 8px; background: color-mix(in srgb, var(--superficie-elevada) 92%, transparent); font-size: 11px; box-shadow: var(--sombra); }
+.leyenda-mapa p { margin: 0 0 4px; font: 600 10px var(--fuente-texto); letter-spacing: 0.08em; text-transform: uppercase; color: var(--tinta-suave); }
+.leyenda-mapa ul { margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 3px; }
+.leyenda-mapa li { display: flex; align-items: center; gap: 7px; }
+.leyenda-mapa .muestra { border-radius: 50%; background: var(--color-clase); border: 1.4px solid var(--color-clase); opacity: 0.85; flex: none; }
+
+.pie-mapa { position: absolute; left: 10px; right: 10px; bottom: 8px; display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 6px 12px; pointer-events: none; }
+.escala-mapa { display: flex; flex-direction: column; gap: 2px; font: 500 10px var(--fuente-datos); color: var(--tinta); }
+.escala-mapa .barra-escala { height: 6px; border: 1.5px solid var(--tinta); border-top: 0; }
+.coordenadas-puntero { padding: 2px 6px; border-radius: 4px; background: color-mix(in srgb, var(--superficie-elevada) 88%, transparent); font: 500 11px var(--fuente-datos); color: var(--tinta); }
+.atribucion { font-size: 10px; color: var(--tinta-suave); text-shadow: 0 0 3px var(--mar), 0 0 3px var(--mar); }
+
+.etiqueta-flotante { position: absolute; z-index: 5; max-width: 240px; padding: 5px 8px; border-radius: 6px; background: var(--tinta); color: var(--fondo); font-size: 12px; pointer-events: none; box-shadow: var(--sombra); }
+
+/* Ficha de detalle */
+.ficha { flex: 0 0 auto; max-height: 44%; overflow: auto; padding: 12px 14px; background: var(--superficie); border: 1px solid var(--linea); border-radius: 10px; }
+.ficha-cabecera { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: center; gap: 4px 14px; }
+.ficha-magnitud { padding-inline-end: 14px; border-inline-end: 4px solid var(--color-clase); font: 800 40px / 1 var(--fuente-titulo); font-variant-numeric: tabular-nums; }
+.ficha-magnitud small { display: block; margin-top: 3px; font: 500 10px var(--fuente-datos); letter-spacing: 0.06em; color: var(--tinta-suave); }
+.ficha-titulo { margin: 0; font: 600 16px / 1.25 var(--fuente-titulo); overflow-wrap: anywhere; }
+.ficha-hora { margin: 2px 0 0; color: var(--tinta-suave); font-size: 13px; }
+.ficha-acciones { display: flex; gap: 6px; }
+.ficha-acciones button { width: 32px; height: 32px; border: 1px solid var(--linea-fuerte); border-radius: 8px; background: var(--superficie-elevada); }
+.ficha-acciones button:hover { background: var(--acento-suave); }
+.ficha-acciones button:disabled { opacity: 0.4; cursor: default; }
+.ficha-cuerpo { margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--linea); }
+.rejilla-datos { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 10px 18px; margin: 0; }
+.rejilla-datos div { min-width: 0; }
+.rejilla-datos dt { font: 600 10px var(--fuente-texto); letter-spacing: 0.07em; text-transform: uppercase; color: var(--tinta-suave); }
+.rejilla-datos dd { margin: 1px 0 0; font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }
+.dato-mono { font-family: var(--fuente-datos); font-size: 13px; }
+.acciones-ficha { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; margin-top: 12px; }
+.acciones-ficha a, .acciones-ficha button { padding: 6px 12px; border: 1px solid var(--acento); border-radius: 8px; background: transparent; color: var(--acento); font-size: 13px; font-weight: 500; text-decoration: none; }
+.acciones-ficha a:hover, .acciones-ficha button:hover { background: var(--acento-suave); }
+.pastilla { display: inline-block; padding: 1px 8px; border-radius: 999px; background: color-mix(in srgb, var(--color-pastilla) 20%, transparent); border: 1px solid var(--color-pastilla); font-size: 12px; font-weight: 600; }
+.pastilla[data-alerta="green"] { --color-pastilla: var(--alerta-verde); }
+.pastilla[data-alerta="yellow"] { --color-pastilla: var(--alerta-amarilla); }
+.pastilla[data-alerta="orange"] { --color-pastilla: var(--alerta-naranja); }
+.pastilla[data-alerta="red"] { --color-pastilla: var(--alerta-roja); }
+.pastilla[data-alerta="none"] { --color-pastilla: var(--linea-fuerte); }
+.boton-detalle-movil { display: none; }
+
+@media (max-width: 899px) {
+  .pestanas { display: flex; }
+  .cuerpo { grid-template-columns: minmax(0, 1fr); }
+  .resumen { font-size: 12px; gap: 2px 14px; }
+  .leyenda-mapa { display: none; }
+  .ficha { max-height: 52%; padding: 10px 12px; }
+  .ficha-magnitud { font-size: 32px; }
+  .boton-detalle-movil { display: inline-block; margin-top: 8px; padding: 6px 12px; border: 1px solid var(--linea-fuerte); border-radius: 8px; background: transparent; font-size: 13px; font-weight: 500; }
+  .ficha[data-abierta="false"] .ficha-cuerpo { display: none; }
+  .ficha-cuerpo { margin-top: 10px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .onda-principal { animation: none; opacity: 0; }
+}
+</style>
+
+<script type="application/json" id="datos-mapa-base">{"type":"FeatureCollection","features":[{"type":"Feature","properties":{"codigo":"CR-A","nombre":"Alajuela","tipo":"Vecino","pais":"Costa Rica"},"geometry":{"type":"MultiPolygon","coordinates":[[[[-84.355,10.995],[-84.311,10.919],[-84.208,10.861],[-84.219,10.806],[-84.192,10.782],[-84.158,10.788],[-84.178,10.004],[-84.215,9.941],[-84.327,9.912],[-84.461,9.917],[-84.538,9.87],[-84.571,9.825],[-84.602,9.86],[-84.674,9.884],[-84.636,9.941],[-84.55,9.998],[-84.57,10.022],[-84.594,10.013],[-84.66,10.114],[-84.669,10.182],[-84.648,10.236],[-84.666,10.267],[-84.692,10.28],[-84.75,10.267],[-84.787,10.315],[-84.764,10.442],[-84.793,10.497],[-84.868,10.549],[-84.937,10.569],[-84.984,10.616],[-85.023,10.699],[-85.18,10.768],[-85.283,10.76],[-85.316,10.821],[-85.392,10.855],[-85.441,10.915],[-85.394,10.928],[-85.236,11.053],[-84.908,10.939],[-84.676,11.07],[-84.621,11.036],[-84.498,11.002],[-84.438,10.952],[-84.355,10.995]]]]}},{"type":"Feature","properties":{"codigo":"PA-1","nombre":"Bocas del Toro","tipo":"Provincia","pais":"Panamá"},"geometry":{"type":"MultiPolygon","coordinates":[[[[-82.829,9.603],[-82.771,9.58],[-82.729,9.545],[-82.72,9.541],[-82.712,9.545],[-82.701,9.534],[-82.689,9.509],[-82.678,9.498],[-82.651,9.488],[-82.632,9.485],[-82.619,9.487],[-82.612,9.499],[-82.608,9.538],[-82.601,9.549],[-82.586,9.546],[-82.571,9.538],[-82.563,9.539],[-82.574,9.576],[-82.562,9.569],[-82.466,9.494],[-82.407,9.435],[-82.369,9.415],[-82.343,9.433],[-82.345,9.415],[-82.35,9.402],[-82.377,9.355],[-82.379,9.344],[-82.376,9.33],[-82.368,9.321],[-82.348,9.306],[-82.349,9.295],[-82.362,9.284],[-82.388,9.286],[-82.39,9.275],[-82.395,9.267],[-82.394,9.262],[-82.389,9.26],[-82.383,9.261],[-82.373,9.255],[-82.364,9.243],[-82.358,9.229],[-82.356,9.217],[-82.351,9.207],[-82.315,9.185],[-82.308,9.185],[-82.3,9.197],[-82.288,9.199],[-82.282,9.202],[-82.294,9.22],[-82.281,9.217],[-82.276,9.206],[-82.273,9.194],[-82.266,9.185],[-82.255,9.183],[-82.248,9.187],[-82.244,9.198],[-82.246,9.213],[-82.239,9.213],[-82.238,9.2],[-82.231,9.194],[-82.223,9.193],[-82.219,9.196],[-82.217,9.217],[-82.213,9.22],[-82.205,9.213],[-82.203,9.221],[-82.198,9.22],[-82.193,9.204],[-82.184,9.193],[-82.178,9.193],[-82.178,9.2],[-82.171,9.2],[-82.173,9.185],[-82.172,9.157],[-82.178,9.145],[-82.208,9.164],[-82.224,9.17],[-82.25,9.172],[-82.261,9.164],[-82.264,9.147],[-82.261,9.128],[-82.253,9.117],[-82.253,9.11],[-82.274,9.117],[-82.268,9.102],[-82.245,9.09],[-82.239,9.079],[-82.246,9.014],[-82.253,9.016],[-82.26,9.021],[-82.243,9.004],[-82.219,8.993],[-82.195,8.991],[-82.178,9.001],[-82.142,8.989],[-82.129,8.981],[-82.129,8.973],[-82.107,8.942],[-82.105,8.935],[-82.102,8.932],[-82.068,8.931],[-82.02,8.945],[-82.007,8.947],[-82.016,8.919],[-82.035,8.908],[-82.061,8.902],[-82.132,8.901],[-82.151,8.891],[-82.164,8.871],[-82.17,8.848],[-82.179,8.844],[-82.187,8.856],[-82.192,8.882],[-82.196,8.891],[-82.209,8.899],[-82.211,8.917],[-82.2,8.925],[-82.196,8.942],[-82.202,8.955],[-82.226,8.97],[-82.262,8.977],[-82.273,8.987],[-82.28,8.998],[-82.301,9.002],[-82.322,9.009],[-82.323,9.024],[-82.318,9.039],[-82.303,9.051],[-82.28,9.081],[-82.308,9.092],[-82.316,9.099],[-82.31,9.114],[-82.314,9.126],[-82.323,9.128],[-82.338,9.112],[-82.352,9.086],[-82.353,9.062],[-82.393,9.026],[-82.427,9.013],[-82.44,9.0],[-82.428,8.989],[-82.37,8.968],[-82.348,8.949],[-82.335,8.925],[-82.331,8.904],[-82.338,8.889],[-82.355,8.827],[-82.363,8.809],[-82.446,8.847],[-82.492,8.861],[-82.53,8.863],[-82.541,8.885],[-82.552,8.894],[-82.568,8.9],[-82.625,8.903],[-82.693,8.894],[-82.72,8.92],[-82.723,8.931],[-82.749,8.974],[-82.763,8.983],[-82.808,8.998],[-82.854,9.032],[-82.882,9.045],[-82.887,9.051],[-82.893,9.067],[-82.9,9.072],[-82.909,9.072],[-82.939,9.06],[-82.944,9.437],[-82.942,9.456],[-82.933,9.47],[-82.915,9.477],[-82.861,9.484],[-82.846,9.493],[-82.845,9.501],[-82.856,9.505],[-82.86,9.511],[-82.867,9.539],[-82.879,9.56],[-82.877,9.569],[-82.866,9.585],[-82.847,9.601],[-82.829,9.603]]],[[[-82.123,9.323],[-82.098,9.311],[-82.085,9.303],[-82.075,9.289],[-82.094,9.291],[-82.114,9.283],[-82.13,9.268],[-82.139,9.245],[-82.144,9.247],[-82.154,9.258],[-82.152,9.26],[-82.15,9.264],[-82.15,9.287],[-82.154,9.296],[-82.164,9.302],[-82.164,9.308],[-82.15,9.302],[-82.159,9.323],[-82.174,9.33],[-82.193,9.334],[-82.212,9.343],[-82.212,9.349],[-82.201,9.356],[-82.196,9.355],[-82.191,9.349],[-82.174,9.344],[-82.166,9.345],[-82.157,9.349],[-82.147,9.345],[-82.123,9.323]]],[[[-82.328,9.412],[-82.302,9.432],[-82.286,9.439],[-82.266,9.439],[-82.239,9.399],[-82.232,9.373],[-82.246,9.357],[-82.246,9.349],[-82.24,9.342],[-82.246,9.33],[-82.26,9.353],[-82.281,9.375],[-82.328,9.412]]],[[[-82.047,9.173],[-82.052,9.178],[-82.052,9.182],[-82.046,9.179],[-82.041,9.173],[-82.036,9.17],[-82.029,9.169],[-82.023,9.154],[-82.009,9.148],[-82.01,9.141],[-82.027,9.133],[-82.033,9.135],[-82.05,9.146],[-82.055,9.154],[-82.055,9.162],[-82.047,9.173]]]]}},{"type":"Feature","properties":{"codigo":"CR-L","nombre":"Limón","tipo":"Vecino","pais":"Costa Rica"},"geometry":{"type":"MultiPolygon","coordinates":[[[[-82.72,9.541],[-82.771,9.58],[-82.847,9.601],[-82.879,9.56],[-82.846,9.493],[-82.942,9.456],[-82.94,9.071],[-83.002,9.136],[-83.053,9.155],[-83.074,9.232],[-83.166,9.317],[-83.228,9.318],[-83.317,9.367],[-83.39,9.326],[-83.454,9.377],[-83.51,9.514],[-83.511,9.566],[-83.336,9.821],[-83.345,9.914],[-83.319,9.97],[-83.589,9.977],[-83.943,10.136],[-83.929,10.181],[-83.848,10.287],[-83.843,10.333],[-83.872,10.402],[-83.823,10.485],[-83.827,10.639],[-83.773,10.679],[-83.704,10.688],[-83.731,10.715],[-83.733,10.755],[-83.764,10.774],[-83.663,10.807],[-83.67,10.892],[-83.697,10.937],[-83.644,10.926],[-83.581,10.807],[-83.583,10.776],[-83.624,10.858],[-83.609,10.746],[-83.638,10.721],[-83.589,10.748],[-83.589,10.721],[-83.575,10.768],[-83.466,10.495],[-83.204,10.129],[-83.085,10.002],[-83.062,10.015],[-83.026,10.005],[-83.009,9.949],[-82.877,9.78],[-82.834,9.739],[-82.808,9.747],[-82.788,9.673],[-82.616,9.624],[-82.563,9.539],[-82.601,9.549],[-82.632,9.485],[-82.678,9.498],[-82.72,9.541]]]]}},{"type":"Feature","properties":{"codigo":"CR-P","nombre":"Puntarenas","tipo":"Vecino","pais":"Costa Rica"},"geometry":{"type":"MultiPolygon","coordinates":[[[[-82.94,9.071],[-82.9,9.072],[-82.882,9.045],[-82.749,8.974],[-82.719,8.922],[-82.764,8.88],[-82.879,8.83],[-82.876,8.794],[-82.923,8.756],[-82.842,8.599],[-82.848,8.465],[-83.052,8.328],[-82.996,8.265],[-82.944,8.249],[-82.886,8.102],[-82.898,8.035],[-82.911,8.045],[-82.9,8.105],[-82.968,8.221],[-83.151,8.369],[-83.093,8.447],[-83.137,8.515],[-83.102,8.548],[-83.158,8.555],[-83.185,8.603],[-83.171,8.617],[-83.153,8.577],[-83.124,8.596],[-83.171,8.637],[-83.24,8.624],[-83.259,8.651],[-83.319,8.67],[-83.346,8.73],[-83.384,8.74],[-83.422,8.715],[-83.468,8.717],[-83.487,8.693],[-83.473,8.699],[-83.405,8.589],[-83.287,8.542],[-83.276,8.402],[-83.287,8.377],[-83.31,8.376],[-83.405,8.432],[-83.405,8.418],[-83.462,8.443],[-83.576,8.445],[-83.737,8.593],[-83.74,8.624],[-83.702,8.678],[-83.661,8.69],[-83.627,8.767],[-83.575,8.788],[-83.643,8.782],[-83.583,8.847],[-83.616,8.891],[-83.575,8.878],[-83.63,8.912],[-83.603,8.966],[-83.635,9.044],[-83.727,9.144],[-83.767,9.151],[-83.787,9.199],[-83.84,9.22],[-83.918,9.295],[-84.179,9.398],[-84.168,9.416],[-84.208,9.465],[-84.233,9.473],[-84.205,9.453],[-84.231,9.458],[-84.458,9.526],[-84.535,9.521],[-84.555,9.552],[-84.569,9.555],[-84.563,9.541],[-84.617,9.578],[-84.663,9.652],[-84.678,9.651],[-84.678,9.693],[-84.635,9.783],[-84.726,9.884],[-84.71,9.923],[-84.734,9.943],[-84.734,9.967],[-84.851,9.967],[-84.788,9.987],[-84.898,10.015],[-85.014,10.116],[-85.076,10.138],[-85.069,10.156],[-84.984,10.157],[-84.92,10.111],[-84.92,10.147],[-84.87,10.185],[-84.875,10.293],[-84.829,10.331],[-84.787,10.315],[-84.75,10.267],[-84.684,10.279],[-84.649,10.24],[-84.669,10.182],[-84.66,10.114],[-84.594,10.013],[-84.57,10.022],[-84.55,9.998],[-84.636,9.941],[-84.674,9.884],[-84.602,9.86],[-84.543,9.784],[-84.547,9.759],[-84.592,9.746],[-84.529,9.571],[-84.428,9.562],[-84.395,9.598],[-84.397,9.629],[-84.351,9.637],[-84.146,9.614],[-84.138,9.569],[-84.076,9.552],[-84.075,9.51],[-84.01,9.441],[-83.945,9.398],[-83.902,9.396],[-83.846,9.31],[-83.828,9.245],[-83.764,9.215],[-83.715,9.231],[-83.656,9.139],[-83.563,9.079],[-83.512,9.066],[-83.482,9.095],[-83.473,9.173],[-83.51,9.2],[-83.451,9.331],[-83.429,9.354],[-83.388,9.327],[-83.317,9.367],[-83.228,9.318],[-83.166,9.317],[-83.074,9.232],[-83.053,9.155],[-83.002,9.136],[-82.94,9.071]]],[[[-85.167,10.019],[-85.015,9.945],[-84.96,9.946],[-84.911,9.912],[-84.93,9.886],[-84.905,9.857],[-84.933,9.837],[-84.865,9.829],[-84.946,9.761],[-84.96,9.727],[-85.008,9.744],[-84.995,9.703],[-85.063,9.665],[-85.11,9.555],[-85.229,9.725],[-85.186,9.779],[-85.174,9.852],[-85.217,9.899],[-85.303,9.93],[-85.183,9.979],[-85.167,10.019]]],[[[-85.131,10.099],[-85.097,10.084],[-85.159,10.076],[-85.199,10.118],[-85.11,10.11],[-85.145,10.103],[-85.131,10.099]]],[[[-87.099,5.516],[-87.118,5.515],[-87.065,5.558],[-87.066,5.535],[-87.099,5.516]]],[[[-83.897,8.706],[-83.869,8.714],[-83.878,8.699],[-83.897,8.706]]]]}},{"type":"Feature","properties":{"codigo":"PA-4","nombre":"Chiriquí","tipo":"Provincia","pais":"Panamá"},"geometry":{"type":"MultiPolygon","coordinates":[[[[-82.989,8.264],[-82.996,8.265],[-83.001,8.269],[-83.016,8.289],[-83.044,8.305],[-83.053,8.315],[-83.052,8.328],[-83.043,8.335],[-82.998,8.36],[-82.954,8.402],[-82.925,8.417],[-82.897,8.425],[-82.87,8.438],[-82.848,8.465],[-82.839,8.495],[-82.836,8.53],[-82.842,8.599],[-82.85,8.63],[-82.862,8.656],[-82.879,8.679],[-82.91,8.714],[-82.919,8.727],[-82.924,8.741],[-82.923,8.756],[-82.915,8.765],[-82.885,8.783],[-82.876,8.794],[-82.876,8.808],[-82.888,8.817],[-82.879,8.83],[-82.867,8.838],[-82.764,8.88],[-82.734,8.898],[-82.72,8.92],[-82.693,8.894],[-82.625,8.903],[-82.568,8.9],[-82.552,8.894],[-82.541,8.885],[-82.53,8.863],[-82.492,8.861],[-82.446,8.847],[-82.3,8.782],[-82.282,8.777],[-82.251,8.772],[-82.224,8.769],[-82.204,8.772],[-82.153,8.763],[-82.14,8.704],[-82.149,8.619],[-82.157,8.59],[-82.153,8.569],[-82.143,8.557],[-82.175,8.482],[-82.18,8.458],[-82.164,8.449],[-82.133,8.449],[-82.074,8.467],[-82.064,8.461],[-82.053,8.447],[-82.037,8.418],[-82.022,8.402],[-82.018,8.371],[-81.997,8.34],[-81.949,8.328],[-81.856,8.327],[-81.83,8.318],[-81.813,8.287],[-81.784,8.264],[-81.732,8.262],[-81.716,8.278],[-81.705,8.295],[-81.69,8.297],[-81.68,8.277],[-81.656,8.282],[-81.634,8.297],[-81.624,8.314],[-81.61,8.348],[-81.592,8.372],[-81.548,8.386],[-81.522,8.379],[-81.519,8.342],[-81.513,8.311],[-81.51,8.281],[-81.513,8.251],[-81.516,8.246],[-81.523,8.239],[-81.573,8.176],[-81.598,8.152],[-81.602,8.145],[-81.606,8.135],[-81.634,8.023],[-81.638,8.011],[-81.642,8.003],[-81.664,7.997],[-81.671,8.007],[-81.685,8.045],[-81.691,8.055],[-81.697,8.039],[-81.698,8.021],[-81.708,8.031],[-81.71,8.06],[-81.726,8.068],[-81.726,8.076],[-81.709,8.069],[-81.703,8.07],[-81.698,8.076],[-81.691,8.076],[-81.677,8.068],[-81.711,8.13],[-81.734,8.158],[-81.743,8.173],[-81.746,8.192],[-81.752,8.192],[-81.758,8.181],[-81.761,8.17],[-81.757,8.161],[-81.746,8.158],[-81.774,8.123],[-81.78,8.123],[-81.798,8.137],[-81.877,8.168],[-81.885,8.173],[-81.941,8.185],[-81.952,8.191],[-81.948,8.206],[-81.931,8.233],[-81.943,8.23],[-81.957,8.221],[-81.968,8.209],[-81.972,8.196],[-81.978,8.193],[-81.992,8.201],[-82.013,8.219],[-82.028,8.208],[-82.06,8.21],[-82.093,8.22],[-82.109,8.233],[-82.116,8.233],[-82.117,8.215],[-82.142,8.16],[-82.15,8.164],[-82.15,8.158],[-82.157,8.158],[-82.147,8.181],[-82.148,8.188],[-82.157,8.185],[-82.155,8.193],[-82.154,8.199],[-82.15,8.203],[-82.143,8.205],[-82.143,8.213],[-82.157,8.212],[-82.174,8.202],[-82.188,8.199],[-82.197,8.202],[-82.209,8.216],[-82.219,8.219],[-82.219,8.226],[-82.205,8.233],[-82.217,8.264],[-82.218,8.278],[-82.212,8.288],[-82.212,8.295],[-82.218,8.299],[-82.219,8.304],[-82.212,8.315],[-82.21,8.308],[-82.205,8.308],[-82.21,8.322],[-82.209,8.332],[-82.201,8.339],[-82.184,8.343],[-82.22,8.343],[-82.225,8.34],[-82.241,8.307],[-82.242,8.301],[-82.262,8.303],[-82.277,8.309],[-82.284,8.322],[-82.28,8.343],[-82.314,8.331],[-82.332,8.33],[-82.349,8.336],[-82.343,8.308],[-82.359,8.306],[-82.387,8.291],[-82.4,8.288],[-82.419,8.293],[-82.433,8.304],[-82.435,8.316],[-82.417,8.323],[-82.417,8.329],[-82.426,8.332],[-82.43,8.338],[-82.431,8.356],[-82.441,8.349],[-82.443,8.336],[-82.447,8.324],[-82.466,8.315],[-82.466,8.308],[-82.457,8.296],[-82.452,8.281],[-82.471,8.277],[-82.478,8.277],[-82.486,8.281],[-82.512,8.276],[-82.553,8.287],[-82.623,8.315],[-82.659,8.323],[-82.699,8.323],[-82.738,8.317],[-82.809,8.296],[-82.839,8.279],[-82.862,8.254],[-82.877,8.219],[-82.88,8.178],[-82.873,8.136],[-82.849,8.068],[-82.849,8.062],[-82.862,8.049],[-82.868,8.032],[-82.877,8.024],[-82.898,8.035],[-82.891,8.058],[-82.886,8.102],[-82.939,8.217],[-82.944,8.249],[-82.951,8.259],[-82.968,8.268],[-82.977,8.269],[-82.989,8.264]]],[[[-82.212,8.199],[-82.233,8.205],[-82.247,8.207],[-82.253,8.202],[-82.253,8.188],[-82.246,8.171],[-82.274,8.192],[-82.301,8.196],[-82.308,8.199],[-82.316,8.215],[-82.306,8.224],[-82.274,8.233],[-82.22,8.212],[-82.212,8.199]]],[[[-82.343,8.26],[-82.315,8.24],[-82.335,8.235],[-82.37,8.217],[-82.386,8.213],[-82.398,8.218],[-82.413,8.231],[-82.425,8.247],[-82.431,8.26],[-82.402,8.257],[-82.35,8.294],[-82.328,8.288],[-82.317,8.277],[-82.317,8.268],[-82.327,8.263],[-82.343,8.268],[-82.343,8.26]]],[[[-82.362,8.087],[-82.359,8.099],[-82.352,8.112],[-82.343,8.123],[-82.332,8.13],[-82.321,8.13],[-82.318,8.124],[-82.318,8.1],[-82.347,8.088],[-82.362,8.087]]]]}},{"type":"Feature","properties":{"codigo":"PA-KY","nombre":"Guna Yala","tipo":"Comarca","pais":"Panamá"},"geometry":{"type":"MultiPolygon","coordinates":[[[[-77.374,8.665],[-77.375,8.651],[-77.385,8.644],[-77.418,8.638],[-77.434,8.628],[-77.435,8.621],[-77.43,8.61],[-77.429,8.593],[-77.441,8.568],[-77.469,8.538],[-77.496,8.57],[-77.508,8.574],[-77.546,8.59],[-77.559,8.606],[-77.569,8.64],[-77.579,8.655],[-77.61,8.684],[-77.626,8.707],[-77.654,8.731],[-77.679,8.749],[-77.686,8.758],[-77.692,8.767],[-77.695,8.786],[-77.701,8.8],[-77.712,8.814],[-77.752,8.85],[-77.764,8.859],[-77.779,8.867],[-77.807,8.886],[-77.824,8.893],[-77.834,8.9],[-77.857,8.941],[-77.912,8.997],[-78.015,9.073],[-78.043,9.073],[-78.065,9.108],[-78.072,9.113],[-78.083,9.119],[-78.152,9.135],[-78.159,9.14],[-78.161,9.145],[-78.15,9.161],[-78.146,9.173],[-78.151,9.194],[-78.159,9.203],[-78.166,9.206],[-78.17,9.202],[-78.174,9.193],[-78.178,9.19],[-78.235,9.193],[-78.257,9.191],[-78.265,9.196],[-78.271,9.205],[-78.285,9.249],[-78.289,9.256],[-78.296,9.257],[-78.339,9.237],[-78.366,9.242],[-78.395,9.241],[-78.409,9.244],[-78.414,9.248],[-78.417,9.255],[-78.417,9.27],[-78.42,9.279],[-78.425,9.287],[-78.442,9.298],[-78.449,9.312],[-78.458,9.32],[-78.465,9.321],[-78.486,9.309],[-78.491,9.312],[-78.495,9.329],[-78.5,9.338],[-78.513,9.35],[-78.522,9.351],[-78.528,9.348],[-78.537,9.335],[-78.542,9.331],[-78.595,9.319],[-78.61,9.318],[-78.628,9.321],[-78.677,9.357],[-78.699,9.371],[-78.71,9.374],[-78.715,9.371],[-78.717,9.354],[-78.721,9.347],[-78.728,9.345],[-78.742,9.351],[-78.759,9.369],[-78.765,9.372],[-78.778,9.371],[-78.796,9.359],[-78.809,9.357],[-78.84,9.361],[-78.871,9.359],[-78.878,9.356],[-78.891,9.344],[-78.9,9.341],[-78.915,9.341],[-78.933,9.346],[-78.937,9.345],[-78.939,9.328],[-78.946,9.325],[-78.956,9.328],[-78.973,9.328],[-78.997,9.317],[-79.003,9.313],[-79.006,9.306],[-78.998,9.288],[-78.998,9.284],[-79.002,9.28],[-79.011,9.278],[-79.072,9.277],[-79.094,9.298],[-79.115,9.306],[-79.143,9.31],[-79.171,9.308],[-79.239,9.286],[-79.272,9.28],[-79.28,9.287],[-79.281,9.293],[-79.279,9.303],[-79.266,9.322],[-79.247,9.331],[-79.243,9.321],[-79.239,9.32],[-79.22,9.336],[-79.193,9.353],[-79.157,9.367],[-79.142,9.378],[-79.137,9.39],[-79.136,9.406],[-79.132,9.415],[-79.121,9.432],[-79.113,9.439],[-79.102,9.446],[-79.079,9.451],[-79.075,9.457],[-79.075,9.562],[-79.048,9.564],[-79.013,9.57],[-78.971,9.573],[-78.957,9.565],[-78.957,9.554],[-78.975,9.545],[-78.987,9.547],[-78.997,9.54],[-79.055,9.532],[-79.066,9.514],[-79.058,9.458],[-79.04,9.452],[-79.024,9.456],[-79.014,9.451],[-78.977,9.457],[-78.966,9.455],[-78.953,9.455],[-78.925,9.444],[-78.908,9.431],[-78.903,9.423],[-78.883,9.425],[-78.865,9.422],[-78.853,9.424],[-78.847,9.433],[-78.836,9.435],[-78.818,9.431],[-78.789,9.437],[-78.781,9.446],[-78.764,9.443],[-78.753,9.444],[-78.728,9.455],[-78.718,9.442],[-78.702,9.434],[-78.689,9.436],[-78.656,9.426],[-78.633,9.429],[-78.62,9.419],[-78.604,9.416],[-78.59,9.422],[-78.578,9.432],[-78.561,9.438],[-78.546,9.434],[-78.527,9.422],[-78.513,9.416],[-78.48,9.416],[-78.463,9.405],[-78.453,9.409],[-78.438,9.404],[-78.416,9.384],[-78.378,9.366],[-78.338,9.356],[-78.318,9.345],[-78.303,9.333],[-78.277,9.322],[-78.255,9.317],[-78.208,9.29],[-78.192,9.288],[-78.177,9.29],[-78.155,9.279],[-78.142,9.278],[-78.124,9.266],[-78.114,9.254],[-78.056,9.243],[-78.037,9.236],[-78.025,9.226],[-78.021,9.214],[-77.999,9.191],[-77.986,9.189],[-77.969,9.181],[-77.935,9.143],[-77.89,9.077],[-77.856,9.054],[-77.865,9.08],[-77.876,9.104],[-77.878,9.119],[-77.86,9.11],[-77.839,9.077],[-77.812,9.058],[-77.808,9.035],[-77.798,9.024],[-77.786,9.017],[-77.771,9.004],[-77.767,8.992],[-77.759,8.982],[-77.748,8.973],[-77.744,8.964],[-77.754,8.946],[-77.735,8.923],[-77.721,8.892],[-77.71,8.881],[-77.701,8.889],[-77.697,8.887],[-77.696,8.873],[-77.676,8.862],[-77.656,8.843],[-77.633,8.817],[-77.614,8.809],[-77.619,8.817],[-77.632,8.83],[-77.634,8.84],[-77.629,8.844],[-77.618,8.835],[-77.604,8.816],[-77.574,8.793],[-77.578,8.775],[-77.559,8.76],[-77.554,8.777],[-77.544,8.775],[-77.535,8.758],[-77.54,8.726],[-77.545,8.715],[-77.532,8.703],[-77.501,8.682],[-77.477,8.67],[-77.444,8.664],[-77.413,8.667],[-77.395,8.678],[-77.386,8.67],[-77.374,8.665]]]]}},{"type":"Feature","properties":{"codigo":"CO-CHO","nombre":"Chocó","tipo":"Vecino","pais":"Colombia"},"geometry":{"type":"MultiPolygon","coordinates":[[[[-77.469,8.538],[-77.429,8.593],[-77.434,8.628],[-77.375,8.651],[-77.367,8.678],[-77.299,8.574],[-77.275,8.496],[-77.144,8.421],[-77.053,8.276],[-76.985,8.256],[-76.961,8.17],[-76.96,8.065],[-77.003,7.999],[-77.022,7.898],[-77.093,7.837],[-77.12,7.842],[-77.113,7.788],[-77.126,7.781],[-76.981,7.639],[-76.877,7.565],[-76.692,7.354],[-76.543,7.267],[-76.508,7.186],[-76.505,7.074],[-76.546,6.991],[-76.683,7.026],[-76.817,7.008],[-76.836,6.986],[-76.802,6.927],[-76.811,6.863],[-76.836,6.841],[-76.883,6.845],[-76.973,6.81],[-76.949,6.732],[-76.97,6.705],[-76.945,6.702],[-76.932,6.672],[-76.906,6.694],[-76.901,6.65],[-76.866,6.64],[-76.896,6.615],[-76.893,6.582],[-76.866,6.582],[-76.853,6.54],[-76.788,6.483],[-76.803,6.451],[-76.784,6.438],[-76.805,6.423],[-76.784,6.363],[-76.798,6.301],[-76.771,6.287],[-76.714,6.178],[-76.674,6.162],[-76.35,6.192],[-76.258,6.174],[-76.217,6.035],[-76.189,5.998],[-76.111,5.976],[-76.105,5.93],[-76.136,5.837],[-76.088,5.728],[-76.098,5.643],[-76.042,5.577],[-76.08,5.538],[-76.093,5.455],[-76.166,5.409],[-76.183,5.352],[-76.18,5.309],[-76.098,5.175],[-76.076,5.036],[-76.141,4.97],[-76.17,4.889],[-76.299,4.764],[-76.317,4.679],[-76.427,4.582],[-76.456,4.421],[-76.547,4.392],[-76.496,4.32],[-76.497,4.238],[-76.455,4.216],[-76.443,4.188],[-76.521,4.137],[-76.575,4.056],[-76.654,4.063],[-76.743,3.995],[-76.893,4.042],[-76.957,4.123],[-77.066,4.104],[-77.155,4.183],[-77.221,4.168],[-77.254,4.242],[-77.236,4.265],[-77.337,4.269],[-77.387,4.347],[-77.345,4.446],[-77.313,4.471],[-77.333,4.471],[-77.319,4.684],[-77.299,4.656],[-77.292,4.682],[-77.319,4.71],[-77.326,4.753],[-77.258,4.704],[-77.319,4.821],[-77.34,4.813],[-77.349,4.854],[-77.373,5.149],[-77.346,5.245],[-77.381,5.375],[-77.409,5.386],[-77.408,5.403],[-77.381,5.403],[-77.408,5.465],[-77.462,5.501],[-77.501,5.502],[-77.511,5.485],[-77.559,5.503],[-77.491,5.595],[-77.405,5.628],[-77.333,5.615],[-77.319,5.663],[-77.261,5.701],[-77.246,5.734],[-77.246,5.787],[-77.313,5.896],[-77.353,6.026],[-77.367,5.999],[-77.484,6.189],[-77.483,6.294],[-77.415,6.239],[-77.381,6.301],[-77.378,6.352],[-77.399,6.388],[-77.374,6.404],[-77.36,6.39],[-77.381,6.445],[-77.345,6.566],[-77.415,6.636],[-77.411,6.694],[-77.463,6.721],[-77.538,6.664],[-77.532,6.712],[-77.593,6.828],[-77.671,6.88],[-77.696,6.849],[-77.692,6.947],[-77.653,6.977],[-77.665,7.016],[-77.696,7.075],[-77.689,7.047],[-77.896,7.235],[-77.82,7.477],[-77.755,7.486],[-77.731,7.53],[-77.766,7.626],[-77.764,7.706],[-77.74,7.719],[-77.68,7.671],[-77.613,7.537],[-77.58,7.528],[-77.34,7.707],[-77.38,7.774],[-77.3,7.902],[-77.163,7.939],[-77.201,7.982],[-77.231,8.099],[-77.317,8.251],[-77.374,8.289],[-77.391,8.394],[-77.422,8.456],[-77.489,8.474],[-77.469,8.538]]],[[[-77.435,4.153],[-77.427,4.18],[-77.378,4.194],[-77.36,4.221],[-77.313,4.199],[-77.285,4.211],[-77.299,4.179],[-77.35,4.195],[-77.435,4.153]]],[[[-77.353,4.265],[-77.272,4.258],[-77.303,4.218],[-77.333,4.245],[-77.466,4.237],[-77.55,4.205],[-77.544,4.232],[-77.5,4.261],[-77.436,4.258],[-77.463,4.286],[-77.428,4.286],[-77.452,4.292],[-77.415,4.321],[-77.436,4.327],[-77.428,4.341],[-77.353,4.265]]]]}},{"type":"Feature","properties":{"codigo":"PA-EM","nombre":"Emberá-Wounaan","tipo":"Comarca","pais":"Panamá"},"geometry":{"type":"MultiPolygon","coordinates":[[[[-77.469,8.538],[-77.48,8.526],[-77.489,8.497],[-77.489,8.474],[-77.48,8.468],[-77.45,8.471],[-77.433,8.465],[-77.422,8.456],[-77.406,8.428],[-77.391,8.394],[-77.383,8.325],[-77.374,8.289],[-77.363,8.272],[-77.35,8.267],[-77.337,8.267],[-77.324,8.261],[-77.317,8.251],[-77.295,8.205],[-77.269,8.168],[-77.383,8.137],[-77.425,8.128],[-77.439,8.119],[-77.453,8.101],[-77.463,8.097],[-77.486,8.093],[-77.499,8.096],[-77.52,8.093],[-77.539,8.082],[-77.553,8.085],[-77.572,8.111],[-77.581,8.119],[-77.601,8.125],[-77.611,8.141],[-77.607,8.157],[-77.626,8.2],[-77.664,8.231],[-77.692,8.244],[-77.721,8.251],[-77.732,8.258],[-77.736,8.272],[-77.735,8.288],[-77.757,8.296],[-77.763,8.305],[-77.763,8.31],[-77.772,8.324],[-77.793,8.348],[-77.8,8.375],[-77.817,8.401],[-77.816,8.417],[-77.809,8.435],[-77.81,8.446],[-77.815,8.456],[-77.84,8.482],[-77.84,8.487],[-77.837,8.492],[-77.84,8.499],[-77.861,8.505],[-77.876,8.522],[-77.876,8.526],[-77.87,8.537],[-77.872,8.556],[-77.886,8.568],[-77.898,8.584],[-77.905,8.601],[-77.909,8.622],[-77.897,8.642],[-77.877,8.653],[-77.847,8.695],[-77.836,8.716],[-77.822,8.733],[-77.79,8.74],[-77.778,8.749],[-77.769,8.762],[-77.747,8.773],[-77.723,8.777],[-77.702,8.772],[-77.693,8.772],[-77.692,8.767],[-77.679,8.749],[-77.654,8.731],[-77.626,8.707],[-77.61,8.684],[-77.579,8.655],[-77.569,8.64],[-77.559,8.606],[-77.546,8.59],[-77.508,8.574],[-77.496,8.57],[-77.469,8.538]]],[[[-78.183,8.094],[-78.167,8.082],[-78.118,8.016],[-78.112,7.987],[-78.102,7.978],[-78.092,7.973],[-78.083,7.918],[-78.059,7.931],[-78.035,7.951],[-78.016,7.931],[-77.985,7.836],[-77.981,7.804],[-77.962,7.794],[-77.953,7.779],[-77.948,7.762],[-77.956,7.739],[-77.945,7.652],[-77.95,7.619],[-77.968,7.602],[-77.991,7.59],[-78.005,7.606],[-78.019,7.618],[-78.038,7.607],[-78.048,7.59],[-78.072,7.602],[-78.081,7.645],[-78.09,7.652],[-78.106,7.657],[-78.121,7.668],[-78.138,7.677],[-78.18,7.665],[-78.197,7.678],[-78.245,7.731],[-78.27,7.772],[-78.285,7.819],[-78.304,7.86],[-78.321,7.868],[-78.327,7.88],[-78.331,7.893],[-78.332,7.916],[-78.33,7.936],[-78.334,7.945],[-78.329,7.96],[-78.313,7.964],[-78.296,7.966],[-78.278,7.983],[-78.257,7.996],[-78.226,7.984],[-78.202,8.001],[-78.212,8.025],[-78.21,8.034],[-78.213,8.043],[-78.228,8.05],[-78.225,8.069],[-78.2,8.081],[-78.183,8.094]]]]}},{"type":"Feature","properties":{"codigo":"PA-5","nombre":"Darién","tipo":"Provincia","pais":"Panamá"},"geometry":{"type":"MultiPolygon","coordinates":[[[[-77.269,8.168],[-77.26,8.154],[-77.231,8.099],[-77.21,8.021],[-77.208,7.997],[-77.201,7.982],[-77.171,7.955],[-77.163,7.939],[-77.169,7.935],[-77.206,7.935],[-77.236,7.929],[-77.27,7.918],[-77.3,7.902],[-77.322,7.881],[-77.347,7.824],[-77.377,7.787],[-77.38,7.774],[-77.367,7.745],[-77.346,7.726],[-77.34,7.707],[-77.369,7.681],[-77.509,7.594],[-77.555,7.548],[-77.58,7.528],[-77.603,7.526],[-77.613,7.537],[-77.625,7.587],[-77.633,7.601],[-77.661,7.638],[-77.675,7.645],[-77.67,7.66],[-77.68,7.671],[-77.73,7.713],[-77.74,7.719],[-77.764,7.706],[-77.771,7.669],[-77.766,7.626],[-77.757,7.596],[-77.734,7.552],[-77.731,7.53],[-77.74,7.505],[-77.755,7.486],[-77.774,7.475],[-77.796,7.471],[-77.82,7.477],[-77.896,7.235],[-77.919,7.242],[-77.948,7.268],[-77.99,7.321],[-78.006,7.332],[-78.014,7.341],[-78.018,7.352],[-78.01,7.383],[-78.014,7.394],[-78.02,7.398],[-78.028,7.39],[-78.036,7.393],[-78.038,7.399],[-78.036,7.405],[-78.031,7.404],[-78.043,7.422],[-78.05,7.426],[-78.059,7.418],[-78.066,7.418],[-78.09,7.445],[-78.106,7.459],[-78.117,7.466],[-78.121,7.47],[-78.128,7.489],[-78.144,7.498],[-78.156,7.528],[-78.162,7.528],[-78.166,7.513],[-78.168,7.522],[-78.169,7.557],[-78.174,7.575],[-78.185,7.579],[-78.194,7.571],[-78.197,7.554],[-78.202,7.567],[-78.197,7.585],[-78.197,7.596],[-78.2,7.606],[-78.216,7.623],[-78.238,7.65],[-78.252,7.661],[-78.272,7.664],[-78.269,7.675],[-78.274,7.683],[-78.282,7.688],[-78.292,7.691],[-78.277,7.724],[-78.278,7.737],[-78.285,7.754],[-78.315,7.8],[-78.329,7.843],[-78.351,7.87],[-78.376,7.894],[-78.395,7.917],[-78.408,7.948],[-78.416,7.98],[-78.416,7.992],[-78.414,8.004],[-78.416,8.014],[-78.434,8.046],[-78.436,8.058],[-78.431,8.077],[-78.419,8.095],[-78.407,8.102],[-78.396,8.07],[-78.381,8.064],[-78.365,8.066],[-78.354,8.076],[-78.325,8.061],[-78.286,8.081],[-78.252,8.117],[-78.237,8.154],[-78.239,8.174],[-78.245,8.187],[-78.265,8.205],[-78.294,8.239],[-78.306,8.246],[-78.306,8.254],[-78.279,8.251],[-78.27,8.252],[-78.257,8.26],[-78.257,8.268],[-78.263,8.27],[-78.272,8.281],[-78.261,8.285],[-78.257,8.295],[-78.231,8.274],[-78.222,8.272],[-78.2,8.274],[-78.183,8.298],[-78.184,8.325],[-78.183,8.336],[-78.162,8.356],[-78.158,8.366],[-78.156,8.394],[-78.151,8.399],[-78.142,8.404],[-78.132,8.405],[-78.128,8.401],[-78.121,8.356],[-78.111,8.348],[-78.095,8.339],[-78.077,8.332],[-78.062,8.329],[-78.051,8.322],[-78.042,8.307],[-78.025,8.26],[-78.015,8.247],[-78.003,8.237],[-77.987,8.233],[-77.972,8.238],[-77.961,8.238],[-77.954,8.224],[-77.938,8.214],[-77.929,8.213],[-77.915,8.213],[-77.915,8.219],[-77.931,8.222],[-77.945,8.231],[-77.956,8.242],[-77.963,8.254],[-77.913,8.244],[-77.886,8.235],[-77.869,8.215],[-77.845,8.203],[-77.84,8.196],[-77.839,8.181],[-77.836,8.17],[-77.829,8.163],[-77.819,8.158],[-77.808,8.164],[-77.797,8.158],[-77.789,8.144],[-77.785,8.127],[-77.778,8.116],[-77.763,8.112],[-77.746,8.116],[-77.737,8.13],[-77.765,8.13],[-77.802,8.174],[-77.819,8.171],[-77.871,8.236],[-77.881,8.243],[-77.895,8.252],[-77.984,8.268],[-78.006,8.276],[-78.023,8.29],[-78.035,8.31],[-78.039,8.332],[-78.061,8.376],[-78.067,8.403],[-78.052,8.418],[-78.075,8.435],[-78.086,8.446],[-78.094,8.459],[-78.099,8.476],[-78.096,8.485],[-78.09,8.492],[-78.087,8.5],[-78.088,8.513],[-78.103,8.518],[-78.114,8.528],[-78.119,8.539],[-78.12,8.548],[-78.123,8.556],[-78.134,8.562],[-78.13,8.552],[-78.13,8.527],[-78.125,8.518],[-78.111,8.509],[-78.106,8.508],[-78.107,8.472],[-78.105,8.463],[-78.091,8.431],[-78.09,8.42],[-78.094,8.411],[-78.1,8.411],[-78.119,8.443],[-78.131,8.458],[-78.141,8.466],[-78.157,8.466],[-78.17,8.458],[-78.179,8.442],[-78.183,8.421],[-78.189,8.406],[-78.204,8.394],[-78.223,8.386],[-78.241,8.384],[-78.249,8.387],[-78.253,8.395],[-78.251,8.411],[-78.245,8.418],[-78.216,8.432],[-78.21,8.427],[-78.203,8.425],[-78.202,8.457],[-78.207,8.488],[-78.223,8.542],[-78.231,8.542],[-78.238,8.528],[-78.233,8.518],[-78.223,8.511],[-78.216,8.5],[-78.218,8.482],[-78.23,8.456],[-78.223,8.446],[-78.223,8.438],[-78.237,8.432],[-78.242,8.44],[-78.257,8.452],[-78.261,8.461],[-78.255,8.461],[-78.24,8.485],[-78.242,8.495],[-78.257,8.5],[-78.253,8.488],[-78.255,8.482],[-78.265,8.473],[-78.278,8.446],[-78.295,8.443],[-78.303,8.454],[-78.313,8.487],[-78.32,8.479],[-78.321,8.466],[-78.335,8.446],[-78.353,8.429],[-78.367,8.425],[-78.376,8.441],[-78.387,8.5],[-78.395,8.521],[-78.388,8.534],[-78.395,8.534],[-78.395,8.528],[-78.402,8.528],[-78.402,8.548],[-78.408,8.548],[-78.412,8.524],[-78.394,8.474],[-78.384,8.426],[-78.365,8.411],[-78.361,8.394],[-78.388,8.336],[-78.392,8.344],[-78.41,8.353],[-78.413,8.398],[-78.43,8.456],[-78.432,8.478],[-78.445,8.508],[-78.449,8.534],[-78.448,8.546],[-78.451,8.554],[-78.458,8.56],[-78.445,8.654],[-78.432,8.687],[-78.428,8.703],[-78.433,8.738],[-78.437,8.748],[-78.451,8.82],[-78.439,8.83],[-78.393,8.845],[-78.379,8.845],[-78.362,8.842],[-78.338,8.833],[-78.332,8.827],[-78.322,8.812],[-78.309,8.807],[-78.3,8.809],[-78.29,8.816],[-78.286,8.825],[-78.281,8.843],[-78.271,8.853],[-78.243,8.866],[-78.222,8.87],[-78.186,8.869],[-78.175,8.872],[-78.167,8.878],[-78.154,8.9],[-78.137,8.914],[-78.12,8.922],[-78.095,8.928],[-78.084,8.934],[-78.079,8.944],[-78.082,8.977],[-78.08,9.001],[-78.075,9.02],[-78.069,9.035],[-78.048,9.061],[-78.043,9.073],[-78.015,9.073],[-77.912,8.997],[-77.857,8.941],[-77.834,8.9],[-77.824,8.893],[-77.807,8.886],[-77.752,8.85],[-77.712,8.814],[-77.701,8.8],[-77.695,8.786],[-77.693,8.772],[-77.702,8.772],[-77.723,8.777],[-77.747,8.773],[-77.769,8.762],[-77.778,8.749],[-77.79,8.74],[-77.822,8.733],[-77.836,8.716],[-77.847,8.695],[-77.877,8.653],[-77.897,8.642],[-77.909,8.622],[-77.905,8.601],[-77.898,8.584],[-77.886,8.568],[-77.872,8.556],[-77.87,8.537],[-77.876,8.526],[-77.876,8.522],[-77.861,8.505],[-77.84,8.499],[-77.837,8.492],[-77.84,8.487],[-77.84,8.482],[-77.815,8.456],[-77.81,8.446],[-77.809,8.435],[-77.816,8.417],[-77.817,8.401],[-77.8,8.375],[-77.793,8.348],[-77.772,8.324],[-77.763,8.31],[-77.763,8.305],[-77.757,8.296],[-77.735,8.288],[-77.736,8.272],[-77.732,8.258],[-77.721,8.251],[-77.692,8.244],[-77.664,8.231],[-77.626,8.2],[-77.607,8.157],[-77.611,8.141],[-77.601,8.125],[-77.581,8.119],[-77.572,8.111],[-77.553,8.085],[-77.539,8.082],[-77.52,8.093],[-77.499,8.096],[-77.486,8.093],[-77.463,8.097],[-77.453,8.101],[-77.439,8.119],[-77.425,8.128],[-77.383,8.137],[-77.269,8.168]],[[-78.083,7.918],[-78.092,7.973],[-78.102,7.978],[-78.112,7.987],[-78.118,8.016],[-78.167,8.082],[-78.183,8.094],[-78.2,8.081],[-78.225,8.069],[-78.228,8.05],[-78.213,8.043],[-78.21,8.034],[-78.212,8.025],[-78.202,8.001],[-78.226,7.984],[-78.257,7.996],[-78.278,7.983],[-78.296,7.966],[-78.313,7.964],[-78.329,7.96],[-78.334,7.945],[-78.33,7.936],[-78.332,7.916],[-78.331,7.893],[-78.327,7.88],[-78.321,7.868],[-78.304,7.86],[-78.285,7.819],[-78.27,7.772],[-78.245,7.731],[-78.197,7.678],[-78.18,7.665],[-78.138,7.677],[-78.121,7.668],[-78.106,7.657],[-78.09,7.652],[-78.081,7.645],[-78.072,7.602],[-78.048,7.59],[-78.038,7.607],[-78.019,7.618],[-78.005,7.606],[-77.991,7.59],[-77.968,7.602],[-77.95,7.619],[-77.945,7.652],[-77.956,7.739],[-77.948,7.762],[-77.953,7.779],[-77.962,7.794],[-77.981,7.804],[-77.985,7.836],[-78.016,7.931],[-78.035,7.951],[-78.059,7.931],[-78.083,7.918]]]]}},{"type":"Feature","properties":{"codigo":"CR-H","nombre":"Heredia","tipo":"Vecino","pais":"Costa Rica"},"geometry":{"type":"MultiPolygon","coordinates":[[[[-83.86,10.722],[-83.764,10.774],[-83.733,10.755],[-83.731,10.715],[-83.704,10.688],[-83.773,10.679],[-83.827,10.639],[-83.823,10.485],[-83.872,10.402],[-83.843,10.333],[-83.851,10.279],[-83.914,10.199],[-83.951,10.195],[-83.981,10.163],[-84.071,10.152],[-84.01,10.042],[-84.028,9.982],[-84.151,9.946],[-84.2,9.957],[-84.178,10.004],[-84.166,10.158],[-84.158,10.788],[-84.076,10.764],[-84.009,10.789],[-83.927,10.715],[-83.86,10.722]]]]}},{"type":"Feature","properties":{"codigo":"CO-VAC","nombre":"Valle del Cauca","tipo":"Vecino","pais":"Colombia"},"geometry":{"type":"MultiPolygon","coordinates":[[[[-77.465,3.302],[-77.469,3.345],[-77.381,3.388],[-77.319,3.32],[-77.367,3.402],[-77.353,3.43],[-77.333,3.412],[-77.346,3.436],[-77.333,3.512],[-77.313,3.512],[-77.316,3.48],[-77.264,3.471],[-77.285,3.498],[-77.272,3.505],[-77.299,3.512],[-77.275,3.533],[-77.326,3.532],[-77.322,3.548],[-77.278,3.546],[-77.299,3.559],[-77.278,3.566],[-77.285,3.581],[-77.21,3.581],[-77.227,3.591],[-77.189,3.663],[-77.17,3.652],[-77.118,3.678],[-77.171,3.677],[-77.175,3.693],[-77.126,3.717],[-77.185,3.704],[-77.201,3.743],[-77.195,3.758],[-77.126,3.734],[-77.175,3.758],[-77.126,3.779],[-77.15,3.814],[-77.134,3.827],[-77.12,3.799],[-77.106,3.813],[-77.114,3.853],[-77.069,3.868],[-77.032,3.916],[-77.093,3.909],[-77.079,3.922],[-77.126,3.93],[-77.123,3.886],[-77.181,3.853],[-77.253,3.841],[-77.292,3.861],[-77.272,3.885],[-77.312,3.908],[-77.3,3.969],[-77.27,3.986],[-77.272,3.964],[-77.21,3.977],[-77.244,3.977],[-77.189,4.067],[-77.264,4.108],[-77.264,4.067],[-77.299,4.067],[-77.299,4.046],[-77.319,4.053],[-77.326,3.981],[-77.346,3.93],[-77.362,3.928],[-77.374,3.964],[-77.431,4.013],[-77.43,4.044],[-77.408,4.046],[-77.435,4.153],[-77.35,4.195],[-77.299,4.179],[-77.254,4.242],[-77.221,4.168],[-77.155,4.183],[-77.066,4.104],[-76.957,4.123],[-76.893,4.042],[-76.761,3.996],[-76.73,3.999],[-76.654,4.063],[-76.575,4.056],[-76.546,4.11],[-76.473,4.156],[-76.44,4.201],[-76.497,4.238],[-76.496,4.32],[-76.546,4.395],[-76.456,4.421],[-76.427,4.582],[-76.317,4.679],[-76.299,4.764],[-76.17,4.889],[-76.141,4.97],[-76.076,5.036],[-75.986,4.911],[-75.981,4.873],[-75.922,4.872],[-75.94,4.822],[-75.919,4.77],[-75.852,4.777],[-75.854,4.732],[-75.714,4.713],[-75.716,4.659],[-75.825,4.664],[-75.862,4.613],[-75.877,4.553],[-75.867,4.458],[-75.89,4.424],[-75.809,4.397],[-75.788,4.351],[-75.838,4.122],[-75.762,4.079],[-75.745,4.042],[-75.796,4.008],[-75.989,3.647],[-75.997,3.559],[-76.049,3.442],[-76.065,3.358],[-76.044,3.314],[-76.076,3.213],[-76.256,3.283],[-76.437,3.318],[-76.463,3.285],[-76.442,3.255],[-76.448,3.204],[-76.516,3.163],[-76.553,3.11],[-76.577,3.124],[-76.609,3.098],[-76.632,3.125],[-76.673,3.108],[-76.779,3.184],[-76.829,3.105],[-76.87,3.093],[-77.015,3.168],[-77.11,3.192],[-77.261,3.124],[-77.319,3.175],[-77.372,3.17],[-77.419,3.259],[-77.465,3.302]]]]}},{"type":"Feature","properties":{"codigo":"PA-8","nombre":"Panamá","tipo":"Provincia","pais":"Panamá"},"geometry":{"type":"MultiPolygon","coordinates":[[[[-78.41,8.353],[-78.416,8.356],[-78.439,8.384],[-78.45,8.391],[-78.444,8.403],[-78.445,8.421],[-78.45,8.439],[-78.457,8.452],[-78.464,8.446],[-78.468,8.44],[-78.471,8.425],[-78.475,8.434],[-78.486,8.448],[-78.491,8.459],[-78.491,8.473],[-78.484,8.507],[-78.491,8.524],[-78.52,8.563],[-78.532,8.576],[-78.517,8.575],[-78.496,8.571],[-78.484,8.576],[-78.5,8.589],[-78.506,8.599],[-78.504,8.634],[-78.566,8.651],[-78.559,8.671],[-78.566,8.672],[-78.573,8.665],[-78.582,8.67],[-78.589,8.67],[-78.604,8.665],[-78.613,8.67],[-78.619,8.681],[-78.628,8.706],[-78.614,8.717],[-78.608,8.735],[-78.609,8.756],[-78.614,8.775],[-78.622,8.775],[-78.623,8.758],[-78.619,8.738],[-78.62,8.724],[-78.635,8.726],[-78.652,8.708],[-78.682,8.748],[-78.71,8.747],[-78.729,8.759],[-78.749,8.802],[-78.765,8.816],[-78.765,8.822],[-78.758,8.822],[-78.758,8.829],[-78.772,8.834],[-78.8,8.863],[-78.792,8.847],[-78.79,8.834],[-78.796,8.823],[-78.813,8.816],[-78.828,8.813],[-78.838,8.817],[-78.858,8.84],[-78.865,8.856],[-78.874,8.891],[-79.005,8.96],[-79.058,8.971],[-79.083,8.989],[-79.087,8.994],[-79.088,9.004],[-79.082,9.015],[-79.08,9.025],[-79.081,9.063],[-79.089,9.074],[-79.108,9.076],[-79.108,9.083],[-79.086,9.085],[-79.07,9.093],[-79.059,9.107],[-79.052,9.124],[-79.046,9.124],[-79.037,9.111],[-79.028,9.111],[-79.012,9.124],[-78.991,9.131],[-78.982,9.136],[-78.977,9.145],[-78.984,9.142],[-78.997,9.141],[-79.005,9.138],[-79.029,9.117],[-79.037,9.12],[-79.043,9.131],[-79.052,9.131],[-79.059,9.126],[-79.071,9.107],[-79.088,9.092],[-79.114,9.088],[-79.119,9.083],[-79.121,9.076],[-79.115,9.069],[-79.102,9.065],[-79.09,9.056],[-79.087,9.035],[-79.092,9.023],[-79.102,9.006],[-79.116,8.994],[-79.162,9.007],[-79.168,9.02],[-79.173,9.023],[-79.176,9.011],[-79.193,9.005],[-79.273,9.019],[-79.306,9.014],[-79.306,9.021],[-79.33,9.013],[-79.387,9.019],[-79.409,9.007],[-79.418,9.014],[-79.427,9.013],[-79.482,8.998],[-79.485,8.989],[-79.491,8.983],[-79.519,8.966],[-79.522,8.942],[-79.533,8.939],[-79.516,8.91],[-79.512,8.898],[-79.525,8.907],[-79.541,8.923],[-79.555,8.942],[-79.56,8.96],[-79.566,8.96],[-79.56,8.945],[-79.56,8.939],[-79.566,8.939],[-79.559,8.914],[-79.564,8.893],[-79.578,8.882],[-79.601,8.891],[-79.647,8.883],[-79.661,8.875],[-79.656,8.863],[-79.656,8.857],[-79.681,8.868],[-79.691,8.863],[-79.695,8.868],[-79.704,8.87],[-79.704,8.863],[-79.697,8.85],[-79.714,8.853],[-79.73,8.844],[-79.744,8.83],[-79.752,8.816],[-79.756,8.796],[-79.752,8.737],[-79.75,8.731],[-79.74,8.726],[-79.738,8.723],[-79.739,8.716],[-79.751,8.69],[-79.756,8.682],[-79.766,8.672],[-79.778,8.666],[-79.791,8.663],[-79.791,8.655],[-79.793,8.651],[-79.81,8.647],[-79.826,8.639],[-79.814,8.626],[-79.78,8.618],[-79.747,8.631],[-79.706,8.653],[-79.702,8.657],[-79.697,8.657],[-79.697,8.649],[-79.701,8.642],[-79.734,8.615],[-79.774,8.58],[-79.826,8.562],[-79.864,8.552],[-79.872,8.543],[-79.87,8.532],[-79.872,8.524],[-79.875,8.521],[-79.895,8.515],[-79.918,8.495],[-79.927,8.493],[-79.932,8.489],[-79.942,8.47],[-79.97,8.444],[-80.041,8.398],[-80.082,8.446],[-80.092,8.471],[-80.096,8.527],[-80.105,8.551],[-80.103,8.592],[-80.107,8.626],[-80.113,8.643],[-80.138,8.755],[-80.164,8.831],[-80.165,8.854],[-80.162,8.872],[-80.156,8.889],[-80.133,8.922],[-80.137,8.949],[-80.093,8.984],[-80.05,8.968],[-80.022,8.966],[-79.985,8.978],[-79.956,8.997],[-79.945,9.024],[-79.946,9.039],[-79.949,9.051],[-79.957,9.066],[-79.963,9.083],[-79.921,9.175],[-79.906,9.191],[-79.889,9.194],[-79.858,9.179],[-79.83,9.173],[-79.819,9.168],[-79.809,9.158],[-79.79,9.126],[-79.778,9.114],[-79.756,9.109],[-79.705,9.11],[-79.688,9.116],[-79.67,9.128],[-79.642,9.163],[-79.635,9.19],[-79.622,9.199],[-79.605,9.207],[-79.574,9.218],[-79.569,9.224],[-79.568,9.231],[-79.572,9.249],[-79.57,9.264],[-79.565,9.285],[-79.548,9.334],[-79.547,9.344],[-79.55,9.348],[-79.551,9.356],[-79.548,9.366],[-79.523,9.454],[-79.485,9.469],[-79.441,9.479],[-79.4,9.466],[-79.391,9.46],[-79.37,9.428],[-79.371,9.425],[-79.394,9.414],[-79.397,9.409],[-79.399,9.403],[-79.396,9.396],[-79.391,9.394],[-79.359,9.403],[-79.335,9.402],[-79.329,9.404],[-79.318,9.412],[-79.308,9.415],[-79.29,9.415],[-79.257,9.402],[-79.252,9.397],[-79.254,9.391],[-79.262,9.381],[-79.262,9.376],[-79.248,9.369],[-79.243,9.364],[-79.239,9.357],[-79.239,9.344],[-79.24,9.34],[-79.247,9.331],[-79.266,9.322],[-79.279,9.303],[-79.281,9.293],[-79.28,9.287],[-79.272,9.28],[-79.239,9.286],[-79.171,9.308],[-79.143,9.31],[-79.115,9.306],[-79.094,9.298],[-79.072,9.277],[-79.011,9.278],[-79.002,9.28],[-78.998,9.284],[-78.998,9.288],[-79.006,9.306],[-79.003,9.313],[-78.997,9.317],[-78.973,9.328],[-78.956,9.328],[-78.946,9.325],[-78.939,9.328],[-78.937,9.345],[-78.933,9.346],[-78.915,9.341],[-78.9,9.341],[-78.891,9.344],[-78.878,9.356],[-78.871,9.359],[-78.84,9.361],[-78.809,9.357],[-78.796,9.359],[-78.778,9.371],[-78.771,9.371],[-78.765,9.372],[-78.759,9.369],[-78.742,9.351],[-78.728,9.345],[-78.721,9.347],[-78.717,9.354],[-78.715,9.371],[-78.71,9.374],[-78.699,9.371],[-78.628,9.321],[-78.61,9.318],[-78.595,9.319],[-78.542,9.331],[-78.537,9.335],[-78.528,9.348],[-78.522,9.351],[-78.513,9.35],[-78.5,9.338],[-78.495,9.329],[-78.491,9.312],[-78.486,9.309],[-78.465,9.321],[-78.458,9.32],[-78.449,9.312],[-78.442,9.298],[-78.425,9.287],[-78.42,9.279],[-78.417,9.27],[-78.417,9.255],[-78.414,9.248],[-78.409,9.244],[-78.395,9.241],[-78.366,9.242],[-78.339,9.237],[-78.296,9.257],[-78.289,9.256],[-78.285,9.249],[-78.271,9.205],[-78.265,9.196],[-78.257,9.191],[-78.235,9.193],[-78.178,9.19],[-78.174,9.193],[-78.17,9.202],[-78.166,9.206],[-78.159,9.203],[-78.151,9.194],[-78.146,9.173],[-78.15,9.161],[-78.161,9.145],[-78.159,9.14],[-78.152,9.135],[-78.083,9.119],[-78.072,9.113],[-78.065,9.108],[-78.043,9.073],[-78.048,9.061],[-78.069,9.035],[-78.075,9.02],[-78.08,9.001],[-78.082,8.977],[-78.079,8.944],[-78.084,8.934],[-78.095,8.928],[-78.12,8.922],[-78.137,8.914],[-78.154,8.9],[-78.167,8.878],[-78.175,8.872],[-78.186,8.869],[-78.222,8.87],[-78.243,8.866],[-78.271,8.853],[-78.281,8.843],[-78.286,8.825],[-78.29,8.816],[-78.3,8.809],[-78.309,8.807],[-78.322,8.812],[-78.332,8.827],[-78.338,8.833],[-78.362,8.842],[-78.379,8.845],[-78.393,8.845],[-78.439,8.83],[-78.451,8.82],[-78.437,8.748],[-78.433,8.738],[-78.428,8.703],[-78.432,8.687],[-78.445,8.654],[-78.458,8.56],[-78.451,8.554],[-78.448,8.546],[-78.449,8.534],[-78.445,8.508],[-78.432,8.478],[-78.43,8.456],[-78.413,8.398],[-78.41,8.353]]],[[[-79.094,8.308],[-79.088,8.296],[-79.083,8.274],[-79.076,8.266],[-79.066,8.261],[-79.07,8.257],[-79.08,8.255],[-79.091,8.26],[-79.104,8.253],[-79.105,8.244],[-79.098,8.238],[-79.099,8.23],[-79.105,8.229],[-79.109,8.224],[-79.11,8.21],[-79.123,8.209],[-79.14,8.244],[-79.137,8.257],[-79.131,8.257],[-79.126,8.278],[-79.129,8.287],[-79.124,8.303],[-79.112,8.317],[-79.1,8.317],[-79.095,8.312],[-79.094,8.308]]],[[[-79.084,8.382],[-79.093,8.377],[-79.13,8.405],[-79.118,8.429],[-79.105,8.419],[-79.095,8.406],[-79.09,8.41],[-79.088,8.42],[-79.082,8.416],[-79.086,8.403],[-79.079,8.399],[-79.084,8.382]]],[[[-78.892,8.458],[-78.894,8.469],[-78.89,8.474],[-78.869,8.462],[-78.863,8.454],[-78.855,8.431],[-78.855,8.413],[-78.842,8.411],[-78.836,8.398],[-78.837,8.387],[-78.846,8.381],[-78.848,8.369],[-78.834,8.343],[-78.843,8.32],[-78.852,8.312],[-78.852,8.303],[-78.858,8.296],[-78.87,8.297],[-78.875,8.301],[-78.896,8.297],[-78.901,8.309],[-78.92,8.283],[-78.92,8.274],[-78.923,8.265],[-78.913,8.254],[-78.911,8.234],[-78.905,8.229],[-78.898,8.229],[-78.898,8.224],[-78.904,8.219],[-78.918,8.227],[-78.928,8.236],[-78.927,8.25],[-78.934,8.273],[-78.94,8.283],[-78.964,8.295],[-78.97,8.305],[-78.965,8.321],[-78.958,8.329],[-78.955,8.347],[-78.967,8.362],[-78.97,8.37],[-78.962,8.384],[-78.961,8.39],[-78.966,8.408],[-78.964,8.418],[-78.975,8.444],[-78.971,8.458],[-78.958,8.459],[-78.949,8.453],[-78.909,8.47],[-78.9,8.462],[-78.895,8.452],[-78.892,8.458]]],[[[-79.57,8.799],[-79.563,8.805],[-79.557,8.803],[-79.554,8.803],[-79.553,8.8],[-79.555,8.798],[-79.553,8.792],[-79.542,8.787],[-79.541,8.781],[-79.543,8.776],[-79.548,8.774],[-79.555,8.783],[-79.563,8.781],[-79.569,8.783],[-79.572,8.789],[-79.57,8.799]]],[[[-79.133,8.957],[-79.131,8.959],[-79.129,8.955],[-79.123,8.952],[-79.127,8.949],[-79.127,8.943],[-79.131,8.943],[-79.133,8.945],[-79.13,8.948],[-79.132,8.952],[-79.133,8.957]]]]}},{"type":"Feature","properties":{"codigo":"PA-2","nombre":"Coclé","tipo":"Provincia","pais":"Panamá"},"geometry":{"type":"MultiPolygon","coordinates":[[[[-80.041,8.398],[-80.081,8.372],[-80.196,8.313],[-80.225,8.301],[-80.273,8.295],[-80.3,8.301],[-80.334,8.288],[-80.361,8.295],[-80.375,8.303],[-80.381,8.31],[-80.376,8.315],[-80.386,8.311],[-80.385,8.302],[-80.389,8.295],[-80.407,8.283],[-80.47,8.221],[-80.478,8.202],[-80.475,8.106],[-80.476,8.095],[-80.478,8.091],[-80.491,8.095],[-80.526,8.116],[-80.532,8.115],[-80.544,8.107],[-80.549,8.106],[-80.558,8.113],[-80.577,8.133],[-80.591,8.139],[-80.61,8.137],[-80.646,8.125],[-80.663,8.124],[-80.687,8.133],[-80.734,8.164],[-80.738,8.181],[-80.712,8.227],[-80.697,8.277],[-80.693,8.309],[-80.718,8.349],[-80.757,8.45],[-80.78,8.491],[-80.801,8.519],[-80.822,8.538],[-80.81,8.548],[-80.779,8.553],[-80.751,8.586],[-80.739,8.615],[-80.716,8.614],[-80.706,8.63],[-80.695,8.642],[-80.693,8.652],[-80.696,8.675],[-80.695,8.694],[-80.677,8.738],[-80.667,8.752],[-80.652,8.767],[-80.64,8.772],[-80.63,8.774],[-80.612,8.77],[-80.586,8.77],[-80.569,8.775],[-80.555,8.782],[-80.542,8.791],[-80.536,8.806],[-80.533,8.821],[-80.535,8.852],[-80.543,8.871],[-80.542,8.881],[-80.531,8.917],[-80.524,8.925],[-80.516,8.927],[-80.425,8.893],[-80.411,8.885],[-80.39,8.878],[-80.355,8.872],[-80.342,8.877],[-80.326,8.889],[-80.247,8.964],[-80.233,8.973],[-80.222,8.978],[-80.215,8.986],[-80.208,8.998],[-80.202,9.027],[-80.192,9.047],[-80.178,9.022],[-80.171,8.976],[-80.164,8.966],[-80.157,8.959],[-80.137,8.949],[-80.133,8.922],[-80.156,8.889],[-80.162,8.872],[-80.165,8.854],[-80.164,8.831],[-80.138,8.755],[-80.113,8.643],[-80.107,8.626],[-80.103,8.592],[-80.105,8.551],[-80.096,8.527],[-80.092,8.471],[-80.082,8.446],[-80.041,8.398]]]]}},{"type":"Feature","properties":{"codigo":"PA-9","nombre":"Veraguas","tipo":"Provincia","pais":"Panamá"},"geometry":{"type":"MultiPolygon","coordinates":[[[[-81.808,7.287],[-81.798,7.291],[-81.767,7.287],[-81.779,7.277],[-81.801,7.239],[-81.793,7.226],[-81.801,7.226],[-81.816,7.271],[-81.815,7.28],[-81.819,7.289],[-81.815,7.294],[-81.811,7.294],[-81.807,7.292],[-81.808,7.287]]],[[[-81.149,7.561],[-81.118,7.575],[-81.088,7.582],[-81.075,7.577],[-81.062,7.576],[-81.033,7.575],[-81.045,7.554],[-81.053,7.545],[-81.075,7.535],[-81.083,7.534],[-81.103,7.546],[-81.11,7.547],[-81.119,7.548],[-81.129,7.545],[-81.143,7.528],[-81.171,7.513],[-81.185,7.497],[-81.191,7.493],[-81.209,7.496],[-81.218,7.5],[-81.246,7.49],[-81.252,7.49],[-81.243,7.503],[-81.223,7.521],[-81.21,7.526],[-81.174,7.531],[-81.164,7.541],[-81.158,7.552],[-81.149,7.561]]],[[[-81.664,7.397],[-81.652,7.391],[-81.622,7.394],[-81.616,7.387],[-81.588,7.335],[-81.607,7.328],[-81.628,7.322],[-81.649,7.322],[-81.684,7.341],[-81.727,7.344],[-81.746,7.349],[-81.757,7.358],[-81.781,7.384],[-81.8,7.396],[-81.842,7.431],[-81.865,7.478],[-81.873,7.486],[-81.875,7.49],[-81.883,7.517],[-81.858,7.518],[-81.849,7.52],[-81.849,7.524],[-81.834,7.548],[-81.83,7.576],[-81.824,7.585],[-81.817,7.59],[-81.798,7.594],[-81.76,7.62],[-81.76,7.616],[-81.753,7.616],[-81.76,7.644],[-81.753,7.644],[-81.753,7.637],[-81.746,7.637],[-81.747,7.642],[-81.745,7.643],[-81.739,7.644],[-81.716,7.58],[-81.715,7.568],[-81.705,7.554],[-81.705,7.541],[-81.691,7.541],[-81.676,7.532],[-81.672,7.526],[-81.671,7.51],[-81.676,7.506],[-81.708,7.493],[-81.719,7.453],[-81.713,7.44],[-81.695,7.424],[-81.689,7.404],[-81.684,7.395],[-81.678,7.392],[-81.671,7.397],[-81.664,7.397]]],[[[-81.213,8.792],[-81.13,8.802],[-81.088,8.809],[-81.08,8.805],[-81.071,8.807],[-81.062,8.813],[-81.054,8.822],[-80.975,8.848],[-80.882,8.886],[-80.863,8.885],[-80.86,8.854],[-80.851,8.833],[-80.841,8.821],[-80.815,8.803],[-80.769,8.784],[-80.762,8.779],[-80.74,8.756],[-80.734,8.745],[-80.728,8.73],[-80.742,8.691],[-80.738,8.672],[-80.728,8.659],[-80.724,8.646],[-80.739,8.615],[-80.751,8.586],[-80.779,8.553],[-80.81,8.548],[-80.822,8.538],[-80.801,8.519],[-80.78,8.491],[-80.757,8.45],[-80.718,8.349],[-80.693,8.309],[-80.697,8.277],[-80.712,8.227],[-80.738,8.181],[-80.734,8.164],[-80.687,8.133],[-80.71,8.131],[-80.732,8.133],[-80.742,8.13],[-80.765,8.103],[-80.781,8.088],[-80.854,8.06],[-80.838,8.016],[-80.839,8.0],[-80.85,7.981],[-80.858,7.97],[-80.886,7.944],[-80.907,7.922],[-80.933,7.915],[-80.938,7.911],[-80.943,7.901],[-80.947,7.788],[-80.943,7.766],[-80.919,7.772],[-80.909,7.768],[-80.898,7.753],[-80.892,7.737],[-80.885,7.709],[-80.879,7.695],[-80.802,7.581],[-80.772,7.564],[-80.752,7.559],[-80.746,7.556],[-80.72,7.53],[-80.722,7.502],[-80.715,7.459],[-80.699,7.411],[-80.673,7.376],[-80.667,7.353],[-80.668,7.323],[-80.653,7.318],[-80.644,7.313],[-80.623,7.297],[-80.613,7.286],[-80.607,7.272],[-80.604,7.237],[-80.713,7.216],[-80.793,7.214],[-80.814,7.219],[-80.821,7.219],[-80.826,7.213],[-80.831,7.211],[-80.836,7.213],[-80.841,7.219],[-80.848,7.219],[-80.862,7.206],[-80.873,7.213],[-80.889,7.239],[-80.894,7.243],[-80.911,7.252],[-80.93,7.256],[-80.93,7.264],[-80.926,7.271],[-80.916,7.278],[-80.916,7.308],[-80.911,7.315],[-80.896,7.328],[-80.892,7.342],[-80.892,7.36],[-80.896,7.377],[-80.921,7.392],[-80.921,7.411],[-80.91,7.442],[-80.915,7.455],[-80.951,7.493],[-80.962,7.502],[-80.967,7.51],[-80.955,7.517],[-80.946,7.556],[-80.956,7.57],[-80.979,7.589],[-80.979,7.596],[-80.972,7.596],[-80.972,7.603],[-81.02,7.651],[-81.038,7.658],[-81.041,7.662],[-81.04,7.671],[-81.035,7.68],[-81.028,7.686],[-81.018,7.688],[-81.006,7.685],[-81.011,7.694],[-81.022,7.703],[-81.043,7.712],[-81.045,7.717],[-81.026,7.747],[-81.037,7.746],[-81.055,7.75],[-81.061,7.754],[-81.053,7.756],[-81.054,7.76],[-81.077,7.765],[-81.086,7.779],[-81.085,7.794],[-81.078,7.801],[-81.072,7.804],[-81.061,7.813],[-81.028,7.817],[-81.021,7.823],[-81.02,7.836],[-81.026,7.836],[-81.049,7.823],[-81.056,7.849],[-81.054,7.911],[-81.075,7.871],[-81.09,7.858],[-81.102,7.877],[-81.108,7.877],[-81.102,7.859],[-81.096,7.853],[-81.088,7.849],[-81.088,7.842],[-81.133,7.842],[-81.142,7.844],[-81.155,7.854],[-81.192,7.863],[-81.2,7.894],[-81.218,7.898],[-81.208,7.893],[-81.205,7.89],[-81.204,7.883],[-81.218,7.879],[-81.215,7.871],[-81.198,7.856],[-81.177,7.846],[-81.183,7.824],[-81.165,7.789],[-81.174,7.763],[-81.197,7.742],[-81.218,7.726],[-81.223,7.739],[-81.218,7.747],[-81.218,7.754],[-81.246,7.754],[-81.246,7.747],[-81.235,7.744],[-81.229,7.738],[-81.218,7.719],[-81.232,7.714],[-81.237,7.715],[-81.246,7.719],[-81.232,7.699],[-81.225,7.699],[-81.198,7.712],[-81.193,7.701],[-81.198,7.657],[-81.195,7.639],[-81.198,7.63],[-81.218,7.609],[-81.225,7.609],[-81.234,7.615],[-81.266,7.632],[-81.273,7.633],[-81.279,7.646],[-81.291,7.651],[-81.314,7.651],[-81.397,7.674],[-81.424,7.671],[-81.428,7.683],[-81.435,7.693],[-81.443,7.7],[-81.451,7.705],[-81.474,7.699],[-81.503,7.702],[-81.526,7.711],[-81.527,7.726],[-81.5,7.739],[-81.489,7.749],[-81.528,7.761],[-81.539,7.757],[-81.54,7.74],[-81.563,7.756],[-81.575,7.76],[-81.575,7.767],[-81.568,7.776],[-81.583,7.793],[-81.588,7.804],[-81.586,7.821],[-81.582,7.832],[-81.567,7.849],[-81.567,7.856],[-81.575,7.861],[-81.582,7.862],[-81.589,7.861],[-81.595,7.856],[-81.602,7.856],[-81.609,7.863],[-81.609,7.87],[-81.6,7.878],[-81.6,7.885],[-81.608,7.89],[-81.623,7.89],[-81.619,7.922],[-81.613,7.931],[-81.595,7.925],[-81.598,7.934],[-81.602,7.94],[-81.616,7.952],[-81.611,7.96],[-81.613,7.974],[-81.609,7.986],[-81.621,7.981],[-81.629,7.982],[-81.629,7.969],[-81.623,7.948],[-81.626,7.945],[-81.633,7.946],[-81.638,7.949],[-81.642,7.955],[-81.646,7.973],[-81.664,7.997],[-81.642,8.003],[-81.638,8.011],[-81.634,8.023],[-81.606,8.135],[-81.598,8.152],[-81.573,8.176],[-81.523,8.239],[-81.517,8.244],[-81.513,8.251],[-81.51,8.281],[-81.513,8.311],[-81.519,8.342],[-81.527,8.429],[-81.526,8.444],[-81.523,8.46],[-81.499,8.516],[-81.49,8.556],[-81.489,8.597],[-81.463,8.584],[-81.432,8.577],[-81.421,8.572],[-81.415,8.568],[-81.411,8.559],[-81.363,8.555],[-81.337,8.56],[-81.329,8.558],[-81.282,8.522],[-81.266,8.512],[-81.225,8.501],[-81.203,8.492],[-81.184,8.489],[-81.156,8.496],[-81.172,8.511],[-81.188,8.544],[-81.205,8.565],[-81.211,8.586],[-81.215,8.623],[-81.211,8.684],[-81.223,8.758],[-81.216,8.788],[-81.213,8.792]]]]}},{"type":"Feature","properties":{"codigo":"PA-3","nombre":"Colón","tipo":"Provincia","pais":"Panamá"},"geometry":{"type":"MultiPolygon","coordinates":[[[[-80.579,9.081],[-80.507,9.111],[-80.408,9.142],[-80.293,9.151],[-80.277,9.156],[-80.235,9.179],[-80.2,9.183],[-80.163,9.193],[-80.13,9.206],[-80.101,9.222],[-80.065,9.262],[-80.001,9.321],[-79.999,9.332],[-79.979,9.363],[-79.954,9.373],[-79.947,9.373],[-79.944,9.364],[-79.946,9.326],[-79.944,9.316],[-79.938,9.309],[-79.929,9.304],[-79.919,9.303],[-79.909,9.308],[-79.902,9.327],[-79.9,9.347],[-79.895,9.356],[-79.875,9.343],[-79.882,9.377],[-79.875,9.371],[-79.868,9.377],[-79.88,9.395],[-79.871,9.404],[-79.86,9.399],[-79.841,9.401],[-79.819,9.391],[-79.793,9.349],[-79.797,9.371],[-79.802,9.387],[-79.803,9.401],[-79.793,9.418],[-79.778,9.432],[-79.748,9.443],[-79.732,9.453],[-79.725,9.467],[-79.715,9.48],[-79.691,9.496],[-79.677,9.546],[-79.66,9.552],[-79.652,9.56],[-79.656,9.565],[-79.677,9.558],[-79.682,9.565],[-79.67,9.573],[-79.664,9.583],[-79.65,9.59],[-79.639,9.599],[-79.63,9.608],[-79.612,9.614],[-79.596,9.612],[-79.577,9.618],[-79.551,9.629],[-79.533,9.624],[-79.523,9.603],[-79.522,9.595],[-79.533,9.59],[-79.533,9.583],[-79.523,9.579],[-79.519,9.569],[-79.508,9.577],[-79.505,9.583],[-79.498,9.583],[-79.484,9.575],[-79.464,9.569],[-79.463,9.578],[-79.457,9.596],[-79.451,9.587],[-79.445,9.584],[-79.437,9.585],[-79.43,9.59],[-79.392,9.581],[-79.336,9.574],[-79.273,9.557],[-79.24,9.546],[-79.194,9.54],[-79.175,9.549],[-79.156,9.555],[-79.116,9.552],[-79.075,9.562],[-79.075,9.457],[-79.079,9.451],[-79.102,9.446],[-79.113,9.439],[-79.121,9.432],[-79.132,9.415],[-79.136,9.406],[-79.139,9.384],[-79.148,9.372],[-79.157,9.367],[-79.193,9.353],[-79.22,9.336],[-79.239,9.32],[-79.243,9.321],[-79.247,9.331],[-79.24,9.34],[-79.238,9.35],[-79.239,9.357],[-79.243,9.364],[-79.248,9.369],[-79.262,9.376],[-79.262,9.381],[-79.254,9.391],[-79.252,9.397],[-79.257,9.402],[-79.267,9.407],[-79.29,9.415],[-79.308,9.415],[-79.318,9.412],[-79.329,9.404],[-79.335,9.402],[-79.359,9.403],[-79.384,9.395],[-79.391,9.394],[-79.396,9.396],[-79.399,9.403],[-79.397,9.409],[-79.394,9.414],[-79.371,9.425],[-79.37,9.428],[-79.371,9.433],[-79.391,9.46],[-79.4,9.466],[-79.441,9.479],[-79.485,9.469],[-79.523,9.454],[-79.548,9.366],[-79.551,9.356],[-79.55,9.348],[-79.547,9.344],[-79.548,9.334],[-79.565,9.285],[-79.57,9.264],[-79.572,9.249],[-79.568,9.231],[-79.569,9.224],[-79.574,9.218],[-79.605,9.207],[-79.622,9.199],[-79.635,9.19],[-79.642,9.163],[-79.67,9.128],[-79.688,9.116],[-79.705,9.11],[-79.756,9.109],[-79.778,9.114],[-79.79,9.126],[-79.809,9.158],[-79.819,9.168],[-79.83,9.173],[-79.858,9.179],[-79.889,9.194],[-79.906,9.191],[-79.921,9.175],[-79.963,9.083],[-79.957,9.066],[-79.949,9.051],[-79.946,9.039],[-79.945,9.024],[-79.951,9.008],[-79.956,8.997],[-79.985,8.978],[-80.022,8.966],[-80.05,8.968],[-80.093,8.984],[-80.137,8.949],[-80.157,8.959],[-80.164,8.966],[-80.171,8.976],[-80.178,9.022],[-80.192,9.047],[-80.202,9.027],[-80.208,8.998],[-80.215,8.986],[-80.222,8.978],[-80.233,8.973],[-80.247,8.964],[-80.326,8.889],[-80.342,8.877],[-80.355,8.872],[-80.39,8.878],[-80.411,8.885],[-80.425,8.893],[-80.516,8.927],[-80.524,8.925],[-80.531,8.917],[-80.542,8.881],[-80.543,8.871],[-80.535,8.852],[-80.533,8.821],[-80.536,8.806],[-80.542,8.791],[-80.555,8.782],[-80.569,8.775],[-80.586,8.77],[-80.612,8.77],[-80.63,8.774],[-80.64,8.772],[-80.652,8.767],[-80.667,8.752],[-80.677,8.738],[-80.695,8.694],[-80.696,8.675],[-80.693,8.652],[-80.695,8.642],[-80.706,8.63],[-80.716,8.614],[-80.739,8.615],[-80.724,8.646],[-80.728,8.659],[-80.738,8.672],[-80.742,8.691],[-80.728,8.73],[-80.734,8.745],[-80.74,8.756],[-80.762,8.779],[-80.769,8.784],[-80.815,8.803],[-80.841,8.821],[-80.851,8.833],[-80.86,8.854],[-80.863,8.885],[-80.845,8.884],[-80.822,8.891],[-80.773,8.953],[-80.759,8.963],[-80.751,8.977],[-80.742,8.98],[-80.727,8.997],[-80.703,9.008],[-80.667,9.03],[-80.653,9.035],[-80.637,9.052],[-80.579,9.081]]]]}},{"type":"Feature","properties":{"codigo":"CO-ANT","nombre":"Antioquia","tipo":"Vecino","pais":"Colombia"},"geometry":{"type":"MultiPolygon","coordinates":[[[[-76.985,8.256],[-76.962,8.267],[-76.963,8.204],[-76.918,8.189],[-76.929,8.158],[-76.949,8.164],[-76.943,8.129],[-76.918,8.114],[-76.896,8.117],[-76.894,8.137],[-76.832,8.137],[-76.847,8.096],[-76.825,8.103],[-76.86,8.083],[-76.839,8.055],[-76.866,8.062],[-76.832,8.027],[-76.908,8.044],[-76.934,7.965],[-76.907,7.93],[-76.854,7.913],[-76.757,7.924],[-76.731,8.051],[-76.759,8.115],[-76.748,8.172],[-76.77,8.258],[-76.775,8.417],[-76.802,8.43],[-76.839,8.5],[-76.947,8.545],[-76.894,8.62],[-76.66,8.687],[-76.647,8.747],[-76.56,8.775],[-76.445,8.87],[-76.412,8.84],[-76.389,8.739],[-76.346,8.675],[-76.278,8.642],[-76.229,8.578],[-76.214,8.453],[-76.217,8.41],[-76.318,8.281],[-76.419,8.099],[-76.419,7.979],[-76.505,7.741],[-76.498,7.6],[-76.408,7.38],[-75.857,7.367],[-75.769,7.499],[-75.59,7.57],[-75.547,7.689],[-75.49,7.739],[-75.459,7.808],[-75.362,7.884],[-75.229,8.046],[-74.943,8.073],[-74.886,8.154],[-74.835,8.189],[-74.6,7.998],[-74.552,7.929],[-74.522,7.772],[-74.481,7.724],[-74.499,7.678],[-74.574,7.606],[-74.586,7.493],[-74.563,7.424],[-74.508,7.363],[-74.469,7.361],[-74.364,7.489],[-74.347,7.433],[-74.396,7.343],[-74.405,7.2],[-74.344,7.01],[-74.253,6.996],[-73.93,7.301],[-73.927,7.126],[-73.888,7.02],[-73.925,6.975],[-74.016,6.928],[-74.109,6.79],[-74.293,6.654],[-74.386,6.626],[-74.409,6.567],[-74.406,6.475],[-74.379,6.423],[-74.58,6.216],[-74.605,6.136],[-74.578,6.079],[-74.574,6.002],[-74.605,5.978],[-74.591,5.918],[-74.64,5.862],[-74.662,5.772],[-74.715,5.773],[-74.744,5.7],[-74.777,5.69],[-74.867,5.744],[-74.991,5.714],[-75.022,5.677],[-75.091,5.66],[-75.092,5.596],[-75.134,5.535],[-75.216,5.503],[-75.276,5.434],[-75.291,5.474],[-75.318,5.464],[-75.316,5.517],[-75.34,5.587],[-75.377,5.619],[-75.385,5.674],[-75.426,5.694],[-75.487,5.67],[-75.601,5.735],[-75.613,5.701],[-75.592,5.683],[-75.586,5.519],[-75.687,5.529],[-75.725,5.559],[-75.858,5.489],[-75.925,5.494],[-75.983,5.521],[-76.098,5.643],[-76.088,5.728],[-76.136,5.837],[-76.105,5.93],[-76.111,5.976],[-76.189,5.998],[-76.217,6.035],[-76.258,6.174],[-76.35,6.192],[-76.649,6.159],[-76.714,6.178],[-76.771,6.287],[-76.798,6.301],[-76.784,6.363],[-76.805,6.423],[-76.784,6.438],[-76.803,6.451],[-76.788,6.483],[-76.853,6.54],[-76.866,6.582],[-76.893,6.582],[-76.896,6.615],[-76.866,6.64],[-76.901,6.65],[-76.906,6.694],[-76.932,6.672],[-76.945,6.702],[-76.97,6.705],[-76.949,6.732],[-76.973,6.81],[-76.883,6.845],[-76.836,6.841],[-76.811,6.863],[-76.802,6.927],[-76.836,6.986],[-76.817,7.008],[-76.683,7.026],[-76.546,6.991],[-76.505,7.074],[-76.508,7.186],[-76.543,7.267],[-76.692,7.354],[-76.877,7.565],[-76.981,7.639],[-77.126,7.781],[-77.113,7.788],[-77.12,7.842],[-77.093,7.837],[-77.022,7.898],[-77.003,7.999],[-76.96,8.065],[-76.961,8.17],[-76.985,8.256]]]]}},{"type":"Feature","properties":{"codigo":"CO-COR","nombre":"Córdoba","tipo":"Vecino","pais":"Colombia"},"geometry":{"type":"MultiPolygon","coordinates":[[[[-76.445,8.87],[-76.427,8.911],[-76.324,8.941],[-76.264,8.996],[-76.255,9.071],[-76.193,9.135],[-76.168,9.247],[-76.117,9.266],[-76.096,9.333],[-75.977,9.383],[-75.944,9.441],[-75.91,9.428],[-75.811,9.444],[-75.798,9.418],[-75.853,9.412],[-75.825,9.412],[-75.812,9.392],[-75.762,9.422],[-75.698,9.417],[-75.699,9.354],[-75.465,9.238],[-75.43,9.153],[-75.213,9.042],[-75.222,9.023],[-75.198,8.983],[-75.209,8.924],[-75.297,8.897],[-75.357,8.842],[-75.305,8.491],[-75.184,8.402],[-75.078,8.453],[-74.943,8.486],[-74.809,8.351],[-74.801,8.25],[-74.943,8.073],[-75.229,8.046],[-75.362,7.884],[-75.459,7.808],[-75.49,7.739],[-75.547,7.689],[-75.59,7.57],[-75.769,7.499],[-75.857,7.367],[-76.408,7.38],[-76.498,7.6],[-76.505,7.741],[-76.419,7.979],[-76.419,8.099],[-76.318,8.281],[-76.217,8.41],[-76.214,8.453],[-76.229,8.578],[-76.278,8.642],[-76.346,8.675],[-76.389,8.739],[-76.412,8.84],[-76.445,8.87]]]]}},{"type":"Feature","properties":{"codigo":"CO-SUC","nombre":"Sucre","tipo":"Vecino","pais":"Colombia"},"geometry":{"type":"MultiPolygon","coordinates":[[[[-75.698,9.417],[-75.673,9.41],[-75.621,9.453],[-75.577,9.562],[-75.576,9.621],[-75.618,9.689],[-75.705,9.701],[-75.64,9.783],[-75.59,9.964],[-75.582,10.092],[-75.486,10.143],[-75.537,10.047],[-75.524,10.033],[-75.476,10.04],[-75.464,9.965],[-75.478,9.915],[-75.375,9.878],[-75.327,9.881],[-75.374,9.64],[-75.298,9.678],[-75.183,9.643],[-75.068,9.54],[-75.008,9.531],[-75.02,9.468],[-74.942,9.469],[-74.904,9.437],[-74.941,9.347],[-74.9,9.177],[-74.863,9.149],[-74.825,9.076],[-74.659,8.966],[-74.542,8.815],[-74.603,8.727],[-74.551,8.463],[-74.574,8.401],[-74.604,8.405],[-74.636,8.332],[-74.805,8.28],[-74.809,8.351],[-74.943,8.486],[-75.078,8.453],[-75.184,8.402],[-75.295,8.481],[-75.319,8.521],[-75.357,8.842],[-75.297,8.897],[-75.209,8.924],[-75.198,8.983],[-75.222,9.023],[-75.213,9.042],[-75.43,9.153],[-75.465,9.238],[-75.699,9.354],[-75.698,9.417]]]]}},{"type":"Feature","properties":{"codigo":"CO-BOL","nombre":"Bolívar","tipo":"Vecino","pais":"Colombia"},"geometry":{"type":"MultiPolygon","coordinates":[[[[-75.582,10.092],[-75.589,10.128],[-75.541,10.189],[-75.531,10.241],[-75.644,10.154],[-75.704,10.134],[-75.631,10.213],[-75.615,10.27],[-75.592,10.269],[-75.592,10.303],[-75.584,10.282],[-75.516,10.319],[-75.524,10.392],[-75.539,10.386],[-75.551,10.419],[-75.578,10.398],[-75.566,10.433],[-75.503,10.488],[-75.522,10.433],[-75.493,10.435],[-75.489,10.501],[-75.51,10.508],[-75.504,10.552],[-75.525,10.567],[-75.464,10.603],[-75.462,10.631],[-75.424,10.643],[-75.404,10.68],[-75.263,10.74],[-75.263,10.674],[-75.227,10.628],[-75.266,10.531],[-75.254,10.497],[-75.175,10.479],[-75.177,10.457],[-75.133,10.403],[-75.077,10.414],[-74.983,10.343],[-74.917,10.267],[-74.943,10.137],[-74.853,10.093],[-74.808,10.034],[-74.812,9.985],[-74.871,9.951],[-74.879,9.915],[-74.874,9.849],[-74.815,9.769],[-74.828,9.686],[-74.781,9.631],[-74.8,9.449],[-74.77,9.453],[-74.742,9.418],[-74.703,9.43],[-74.677,9.395],[-74.636,9.382],[-74.533,9.243],[-74.479,9.269],[-74.431,9.267],[-74.413,9.227],[-74.354,9.231],[-74.312,9.214],[-74.295,9.166],[-74.238,9.154],[-74.197,9.093],[-74.142,9.058],[-74.153,9.049],[-74.091,9.029],[-74.043,9.055],[-73.984,8.989],[-73.872,8.973],[-73.882,8.914],[-73.808,8.817],[-73.83,8.644],[-73.796,8.579],[-73.755,8.389],[-73.767,8.359],[-73.755,8.329],[-73.796,8.213],[-73.786,8.161],[-73.855,8.105],[-73.872,8.045],[-73.817,7.801],[-73.83,7.61],[-73.913,7.495],[-73.899,7.421],[-73.93,7.301],[-74.253,6.996],[-74.344,7.01],[-74.398,7.169],[-74.396,7.343],[-74.347,7.433],[-74.364,7.489],[-74.404,7.457],[-74.446,7.381],[-74.489,7.358],[-74.529,7.382],[-74.582,7.467],[-74.574,7.606],[-74.499,7.678],[-74.481,7.724],[-74.522,7.772],[-74.552,7.929],[-74.6,7.998],[-74.835,8.189],[-74.801,8.25],[-74.805,8.28],[-74.74,8.311],[-74.657,8.317],[-74.621,8.349],[-74.604,8.405],[-74.568,8.413],[-74.551,8.463],[-74.562,8.57],[-74.586,8.612],[-74.603,8.727],[-74.542,8.815],[-74.659,8.966],[-74.825,9.076],[-74.863,9.149],[-74.9,9.177],[-74.941,9.347],[-74.904,9.437],[-74.942,9.469],[-75.02,9.468],[-75.008,9.531],[-75.068,9.54],[-75.183,9.643],[-75.298,9.678],[-75.374,9.64],[-75.327,9.881],[-75.375,9.878],[-75.478,9.915],[-75.464,9.965],[-75.476,10.04],[-75.524,10.033],[-75.537,10.047],[-75.486,10.143],[-75.582,10.092]]],[[[-75.23,10.763],[-75.25,10.748],[-75.27,10.759],[-75.267,10.795],[-75.229,10.811],[-75.23,10.763]]],[[[-75.587,10.368],[-75.576,10.378],[-75.535,10.351],[-75.591,10.319],[-75.587,10.368]]]]}},{"type":"Feature","properties":{"codigo":"PA-NB","nombre":"Ngäbe-Buglé","tipo":"Comarca","pais":"Panamá"},"geometry":{"type":"MultiPolygon","coordinates":[[[[-82.007,8.947],[-81.998,8.947],[-81.985,8.942],[-81.975,8.935],[-81.959,8.932],[-81.944,8.935],[-81.929,8.944],[-81.921,8.955],[-81.924,8.966],[-81.912,8.971],[-81.904,8.971],[-81.89,8.966],[-81.888,8.963],[-81.878,8.954],[-81.867,8.949],[-81.862,8.956],[-81.852,8.958],[-81.793,8.932],[-81.776,8.94],[-81.771,8.957],[-81.774,8.997],[-81.842,9.035],[-81.877,9.087],[-81.886,9.096],[-81.899,9.102],[-81.918,9.115],[-81.933,9.129],[-81.937,9.138],[-81.922,9.138],[-81.897,9.132],[-81.873,9.13],[-81.862,9.142],[-81.895,9.157],[-81.91,9.168],[-81.903,9.179],[-81.883,9.18],[-81.865,9.167],[-81.842,9.138],[-81.815,9.117],[-81.816,9.108],[-81.824,9.105],[-81.834,9.107],[-81.842,9.11],[-81.842,9.104],[-81.826,9.085],[-81.821,9.071],[-81.813,9.068],[-81.762,9.064],[-81.737,9.037],[-81.721,9.032],[-81.706,8.999],[-81.687,8.984],[-81.628,8.899],[-81.587,8.856],[-81.567,8.843],[-81.562,8.834],[-81.539,8.813],[-81.503,8.801],[-81.491,8.801],[-81.473,8.807],[-81.422,8.796],[-81.409,8.8],[-81.382,8.8],[-81.358,8.785],[-81.304,8.782],[-81.266,8.789],[-81.213,8.792],[-81.216,8.788],[-81.223,8.758],[-81.211,8.684],[-81.215,8.623],[-81.211,8.586],[-81.205,8.565],[-81.188,8.544],[-81.172,8.511],[-81.156,8.496],[-81.184,8.489],[-81.203,8.492],[-81.225,8.501],[-81.266,8.512],[-81.282,8.522],[-81.329,8.558],[-81.337,8.56],[-81.363,8.555],[-81.411,8.559],[-81.415,8.568],[-81.421,8.572],[-81.432,8.577],[-81.463,8.584],[-81.489,8.597],[-81.49,8.556],[-81.499,8.516],[-81.523,8.46],[-81.526,8.444],[-81.527,8.429],[-81.522,8.379],[-81.548,8.386],[-81.592,8.372],[-81.61,8.348],[-81.624,8.314],[-81.634,8.297],[-81.656,8.282],[-81.68,8.277],[-81.69,8.297],[-81.705,8.295],[-81.716,8.278],[-81.732,8.262],[-81.784,8.264],[-81.813,8.287],[-81.83,8.318],[-81.856,8.327],[-81.949,8.328],[-81.997,8.34],[-82.018,8.371],[-82.022,8.402],[-82.037,8.418],[-82.053,8.447],[-82.064,8.461],[-82.074,8.467],[-82.133,8.449],[-82.164,8.449],[-82.18,8.458],[-82.175,8.482],[-82.143,8.557],[-82.153,8.569],[-82.157,8.59],[-82.149,8.619],[-82.14,8.704],[-82.153,8.763],[-82.196,8.772],[-82.204,8.772],[-82.224,8.769],[-82.282,8.777],[-82.3,8.782],[-82.318,8.791],[-82.363,8.809],[-82.355,8.827],[-82.338,8.889],[-82.331,8.904],[-82.335,8.925],[-82.348,8.949],[-82.37,8.968],[-82.428,8.989],[-82.44,9.0],[-82.427,9.013],[-82.393,9.026],[-82.353,9.062],[-82.352,9.086],[-82.338,9.112],[-82.323,9.128],[-82.314,9.126],[-82.31,9.114],[-82.316,9.099],[-82.308,9.092],[-82.28,9.081],[-82.303,9.051],[-82.318,9.039],[-82.323,9.024],[-82.322,9.009],[-82.301,9.002],[-82.28,8.998],[-82.273,8.987],[-82.262,8.977],[-82.226,8.97],[-82.202,8.955],[-82.196,8.942],[-82.2,8.925],[-82.211,8.917],[-82.209,8.899],[-82.196,8.891],[-82.192,8.882],[-82.187,8.856],[-82.179,8.844],[-82.17,8.848],[-82.164,8.871],[-82.151,8.891],[-82.132,8.901],[-82.061,8.902],[-82.035,8.908],[-82.016,8.919],[-82.007,8.947]]],[[[-81.568,9.108],[-81.56,9.104],[-81.558,9.106],[-81.553,9.106],[-81.547,9.103],[-81.538,9.095],[-81.534,9.089],[-81.534,9.086],[-81.562,9.091],[-81.572,9.09],[-81.577,9.105],[-81.575,9.108],[-81.568,9.108]]]]}},{"type":"Feature","properties":{"codigo":"PA-7","nombre":"Los Santos","tipo":"Provincia","pais":"Panamá"},"geometry":{"type":"MultiPolygon","coordinates":[[[[-80.376,7.997],[-80.349,7.989],[-80.328,7.953],[-80.313,7.911],[-80.3,7.883],[-80.204,7.808],[-80.144,7.753],[-80.052,7.637],[-80.006,7.552],[-79.994,7.523],[-79.995,7.503],[-80.01,7.465],[-80.018,7.457],[-80.03,7.454],[-80.065,7.451],[-80.136,7.425],[-80.199,7.425],[-80.211,7.418],[-80.223,7.423],[-80.25,7.43],[-80.259,7.438],[-80.266,7.438],[-80.275,7.434],[-80.307,7.425],[-80.307,7.418],[-80.284,7.422],[-80.266,7.431],[-80.259,7.425],[-80.331,7.401],[-80.358,7.382],[-80.361,7.356],[-80.344,7.327],[-80.348,7.318],[-80.372,7.315],[-80.387,7.308],[-80.396,7.298],[-80.399,7.287],[-80.414,7.28],[-80.424,7.274],[-80.428,7.265],[-80.429,7.252],[-80.437,7.246],[-80.445,7.246],[-80.474,7.253],[-80.604,7.237],[-80.607,7.272],[-80.613,7.286],[-80.623,7.297],[-80.644,7.313],[-80.653,7.318],[-80.668,7.323],[-80.667,7.353],[-80.673,7.376],[-80.699,7.411],[-80.715,7.459],[-80.722,7.502],[-80.72,7.53],[-80.665,7.583],[-80.614,7.663],[-80.608,7.668],[-80.595,7.67],[-80.588,7.673],[-80.58,7.679],[-80.567,7.691],[-80.557,7.709],[-80.553,7.722],[-80.554,7.741],[-80.558,7.749],[-80.571,7.766],[-80.573,7.774],[-80.575,7.805],[-80.58,7.811],[-80.579,7.815],[-80.574,7.821],[-80.546,7.841],[-80.535,7.856],[-80.504,7.911],[-80.491,7.923],[-80.459,7.933],[-80.428,7.931],[-80.415,7.934],[-80.404,7.942],[-80.393,7.957],[-80.389,7.975],[-80.382,7.983],[-80.376,7.997]]]]}},{"type":"Feature","properties":{"codigo":"PA-6","nombre":"Herrera","tipo":"Provincia","pais":"Panamá"},"geometry":{"type":"MultiPolygon","coordinates":[[[[-80.478,8.091],[-80.484,8.083],[-80.468,8.075],[-80.461,8.056],[-80.456,8.036],[-80.447,8.027],[-80.432,8.024],[-80.394,8.008],[-80.383,7.999],[-80.376,7.997],[-80.382,7.983],[-80.389,7.975],[-80.393,7.957],[-80.404,7.942],[-80.415,7.934],[-80.428,7.931],[-80.459,7.933],[-80.491,7.923],[-80.504,7.911],[-80.535,7.856],[-80.546,7.841],[-80.574,7.821],[-80.579,7.815],[-80.58,7.811],[-80.575,7.805],[-80.573,7.774],[-80.571,7.766],[-80.558,7.749],[-80.554,7.741],[-80.553,7.722],[-80.557,7.709],[-80.567,7.691],[-80.58,7.679],[-80.588,7.673],[-80.595,7.67],[-80.608,7.668],[-80.614,7.663],[-80.665,7.583],[-80.72,7.53],[-80.746,7.556],[-80.752,7.559],[-80.772,7.564],[-80.802,7.581],[-80.879,7.695],[-80.885,7.709],[-80.892,7.737],[-80.898,7.753],[-80.905,7.763],[-80.909,7.768],[-80.919,7.772],[-80.943,7.766],[-80.947,7.788],[-80.943,7.901],[-80.938,7.911],[-80.933,7.915],[-80.907,7.922],[-80.886,7.944],[-80.858,7.97],[-80.85,7.981],[-80.839,8.0],[-80.838,8.016],[-80.854,8.06],[-80.781,8.088],[-80.765,8.103],[-80.742,8.13],[-80.732,8.133],[-80.71,8.131],[-80.687,8.133],[-80.663,8.124],[-80.646,8.125],[-80.61,8.137],[-80.591,8.139],[-80.577,8.133],[-80.558,8.113],[-80.549,8.106],[-80.544,8.107],[-80.532,8.115],[-80.526,8.116],[-80.491,8.095],[-80.478,8.091]]]]}},{"type":"Feature","properties":{"codigo":"CR-SJ","nombre":"San José","tipo":"Vecino","pais":"Costa Rica"},"geometry":{"type":"MultiPolygon","coordinates":[[[[-84.084,9.96],[-84.028,9.982],[-84.009,10.035],[-84.071,10.152],[-83.981,10.163],[-83.951,10.195],[-83.914,10.199],[-83.943,10.136],[-83.926,10.085],[-83.875,10.035],[-83.868,9.97],[-83.908,9.945],[-84.0,9.93],[-84.028,9.879],[-84.003,9.867],[-84.079,9.761],[-83.988,9.768],[-83.913,9.673],[-83.846,9.656],[-83.815,9.601],[-83.763,9.596],[-83.714,9.537],[-83.639,9.57],[-83.487,9.468],[-83.429,9.354],[-83.5,9.25],[-83.509,9.197],[-83.478,9.184],[-83.471,9.156],[-83.482,9.095],[-83.508,9.068],[-83.565,9.08],[-83.656,9.139],[-83.715,9.231],[-83.764,9.215],[-83.821,9.239],[-83.902,9.396],[-83.945,9.398],[-84.01,9.441],[-84.075,9.51],[-84.076,9.552],[-84.138,9.569],[-84.146,9.614],[-84.351,9.637],[-84.397,9.629],[-84.395,9.598],[-84.428,9.562],[-84.526,9.569],[-84.543,9.586],[-84.592,9.746],[-84.545,9.762],[-84.548,9.793],[-84.58,9.817],[-84.538,9.87],[-84.461,9.917],[-84.327,9.912],[-84.2,9.957],[-84.151,9.946],[-84.084,9.96]]]]}},{"type":"Feature","properties":{"codigo":"CR-C","nombre":"Cartago","tipo":"Vecino","pais":"Costa Rica"},"geometry":{"type":"MultiPolygon","coordinates":[[[[-83.912,9.944],[-83.868,9.97],[-83.872,10.026],[-83.926,10.085],[-83.943,10.136],[-83.589,9.977],[-83.319,9.97],[-83.345,9.914],[-83.336,9.821],[-83.511,9.566],[-83.487,9.468],[-83.639,9.57],[-83.714,9.537],[-83.763,9.596],[-83.815,9.601],[-83.846,9.656],[-83.913,9.673],[-83.988,9.768],[-84.076,9.757],[-84.003,9.867],[-84.028,9.879],[-84.0,9.93],[-83.912,9.944]]]]}},{"type":"Feature","properties":{"codigo":"CO-CAL","nombre":"Caldas","tipo":"Vecino","pais":"Colombia"},"geometry":{"type":"MultiPolygon","coordinates":[[[[-74.662,5.772],[-74.632,5.703],[-74.66,5.574],[-74.641,5.563],[-74.678,5.549],[-74.66,5.526],[-74.66,5.458],[-74.749,5.291],[-74.833,5.314],[-75.013,5.294],[-75.063,5.269],[-75.125,5.164],[-75.171,5.174],[-75.223,5.142],[-75.294,5.132],[-75.348,5.06],[-75.317,5.027],[-75.354,4.939],[-75.331,4.879],[-75.378,4.8],[-75.492,4.919],[-75.611,4.934],[-75.638,4.974],[-75.667,4.947],[-75.706,4.949],[-75.748,5.045],[-75.819,4.92],[-75.858,4.932],[-75.896,4.973],[-75.927,5.043],[-75.888,5.124],[-75.838,5.111],[-75.804,5.208],[-75.817,5.272],[-75.752,5.284],[-75.692,5.257],[-75.644,5.304],[-75.719,5.396],[-75.803,5.365],[-75.856,5.374],[-75.858,5.489],[-75.725,5.559],[-75.687,5.529],[-75.586,5.519],[-75.592,5.683],[-75.613,5.701],[-75.613,5.735],[-75.556,5.721],[-75.487,5.67],[-75.426,5.694],[-75.385,5.674],[-75.377,5.619],[-75.34,5.587],[-75.316,5.517],[-75.318,5.464],[-75.291,5.474],[-75.276,5.434],[-75.216,5.503],[-75.134,5.535],[-75.092,5.596],[-75.091,5.66],[-75.022,5.677],[-74.991,5.714],[-74.867,5.744],[-74.777,5.69],[-74.744,5.7],[-74.715,5.773],[-74.662,5.772]]]]}},{"type":"Feature","properties":{"codigo":"CO-TOL","nombre":"Tolima","tipo":"Vecino","pais":"Colombia"},"geometry":{"type":"MultiPolygon","coordinates":[[[[-74.564,3.772],[-74.728,3.609],[-74.734,3.56],[-74.775,3.515],[-74.777,3.441],[-74.909,3.29],[-74.966,3.279],[-75.068,3.301],[-75.036,3.434],[-75.143,3.432],[-75.178,3.389],[-75.213,3.41],[-75.258,3.374],[-75.316,3.412],[-75.355,3.409],[-75.387,3.379],[-75.492,3.347],[-75.57,3.233],[-75.628,3.09],[-75.782,2.948],[-75.812,2.892],[-75.855,2.891],[-75.974,2.948],[-76.031,2.93],[-76.045,3.036],[-76.113,3.106],[-76.044,3.314],[-76.065,3.358],[-76.049,3.442],[-75.997,3.559],[-75.962,3.712],[-75.858,3.87],[-75.796,4.008],[-75.745,4.042],[-75.762,4.079],[-75.601,4.296],[-75.582,4.427],[-75.513,4.559],[-75.422,4.637],[-75.39,4.709],[-75.378,4.8],[-75.331,4.879],[-75.354,4.939],[-75.317,5.027],[-75.348,5.06],[-75.339,5.086],[-75.28,5.139],[-75.242,5.136],[-75.171,5.174],[-75.125,5.164],[-75.063,5.269],[-75.013,5.294],[-74.833,5.314],[-74.749,5.291],[-74.742,5.27],[-74.75,5.026],[-74.729,4.985],[-74.763,4.964],[-74.75,4.889],[-74.771,4.863],[-74.767,4.787],[-74.828,4.722],[-74.791,4.652],[-74.818,4.608],[-74.806,4.505],[-74.891,4.28],[-74.784,4.284],[-74.749,4.243],[-74.655,4.209],[-74.581,4.273],[-74.524,4.243],[-74.48,4.133],[-74.525,4.052],[-74.532,3.984],[-74.511,3.937],[-74.564,3.772]]]]}},{"type":"Feature","properties":{"codigo":"CO-QUI","nombre":"Quindío","tipo":"Vecino","pais":"Colombia"},"geometry":{"type":"MultiPolygon","coordinates":[[[[-75.39,4.717],[-75.428,4.627],[-75.505,4.57],[-75.559,4.476],[-75.601,4.296],[-75.711,4.137],[-75.762,4.079],[-75.83,4.109],[-75.838,4.154],[-75.79,4.288],[-75.788,4.351],[-75.809,4.397],[-75.89,4.424],[-75.867,4.458],[-75.877,4.553],[-75.862,4.613],[-75.825,4.664],[-75.716,4.659],[-75.703,4.72],[-75.533,4.699],[-75.485,4.671],[-75.39,4.717]]]]}},{"type":"Feature","properties":{"codigo":"CO-RIS","nombre":"Risaralda","tipo":"Vecino","pais":"Colombia"},"geometry":{"type":"MultiPolygon","coordinates":[[[[-75.858,5.489],[-75.856,5.374],[-75.803,5.365],[-75.719,5.396],[-75.644,5.304],[-75.692,5.257],[-75.752,5.284],[-75.817,5.272],[-75.804,5.208],[-75.838,5.111],[-75.888,5.124],[-75.927,5.043],[-75.896,4.973],[-75.858,4.932],[-75.819,4.92],[-75.748,5.045],[-75.706,4.949],[-75.667,4.947],[-75.638,4.974],[-75.611,4.934],[-75.492,4.919],[-75.378,4.8],[-75.39,4.717],[-75.441,4.685],[-75.492,4.672],[-75.533,4.699],[-75.854,4.732],[-75.852,4.777],[-75.894,4.761],[-75.924,4.775],[-75.94,4.822],[-75.922,4.872],[-75.981,4.873],[-75.986,4.911],[-76.076,5.036],[-76.098,5.175],[-76.18,5.309],[-76.166,5.409],[-76.093,5.455],[-76.08,5.538],[-76.042,5.577],[-75.96,5.507],[-75.858,5.489]]]]}}]}</script>
+
+<main class="aplicacion">
+  <header class="encabezado">
+    <div>
+      <h1>Sismos de Panamá</h1>
+      <p class="subtitulo" id="subtitulo-secuencia">Secuencia iniciada el 9 de octubre de 2026</p>
+    </div>
+    <div class="estado-sincronizacion" id="estado-sincronizacion" data-nivel="desconocido" role="status">
+      <span class="punto-estado"></span><span id="texto-sincronizacion">Conectando con USGS…</span>
+    </div>
+  </header>
+
+  <ul class="resumen" id="resumen-secuencia" aria-label="Resumen de la secuencia"></ul>
+
+  <div class="pestanas" id="pestanas-movil" role="group" aria-label="Vista">
+    <button type="button" id="pestana-mapa" aria-pressed="true">Mapa y detalle</button>
+    <button type="button" id="pestana-lista" aria-pressed="false">Lista</button>
+  </div>
+
+  <div class="cuerpo" id="cuerpo-aplicacion">
+    <section class="panel panel-lista" id="panel-lista" aria-label="Lista de sismos">
+      <div class="bloque-grafico">
+        <h2 class="titulo-seccion">Magnitud en el tiempo desde el sismo principal</h2>
+        <div class="grafico-secuencia" id="grafico-secuencia"></div>
+      </div>
+      <div class="barra-filtros">
+        <button type="button" class="filtro" data-magnitud-minima="0" aria-pressed="true">Todos</button>
+        <button type="button" class="filtro" data-magnitud-minima="5" aria-pressed="false">M5 o más</button>
+        <button type="button" class="filtro" data-magnitud-minima="6" aria-pressed="false">M6 o más</button>
+        <label class="visually-hidden" for="selector-orden" style="position:absolute;left:-9999px">Ordenar</label>
+        <select class="selector-orden" id="selector-orden">
+          <option value="recientes">Más recientes</option>
+          <option value="magnitud">Mayor magnitud</option>
+          <option value="antiguos">Más antiguos</option>
+        </select>
+      </div>
+      <p class="conteo-lista" id="conteo-lista"></p>
+      <ul class="lista-sismos" id="lista-sismos"></ul>
+    </section>
+
+    <section class="panel panel-mapa" id="panel-mapa" aria-label="Mapa y detalle">
+      <div class="contenedor-mapa" id="contenedor-mapa">
+        <svg class="svg-mapa" id="svg-mapa" role="img" aria-label="Mapa de Panamá con los sismos de la secuencia"></svg>
+        <div class="controles-mapa">
+          <div class="grupo-botones">
+            <button type="button" id="acercar" aria-label="Acercar">+</button>
+            <button type="button" id="alejar" aria-label="Alejar">−</button>
+          </div>
+          <button type="button" class="boton-texto" id="ver-panama">Panamá completo</button>
+          <button type="button" class="boton-texto" id="ver-secuencia">Enfocar sismos</button>
+        </div>
+        <div class="leyenda-mapa" aria-hidden="true">
+          <p>Magnitud</p>
+          <ul>
+            <li data-clase="4"><span class="muestra" style="width:9px;height:9px"></span>M4 a 4.9</li>
+            <li data-clase="5"><span class="muestra" style="width:13px;height:13px"></span>M5 a 5.9</li>
+            <li data-clase="6"><span class="muestra" style="width:18px;height:18px"></span>M6 a 6.9</li>
+            <li data-clase="7"><span class="muestra" style="width:24px;height:24px"></span>M7 o más</li>
+          </ul>
+        </div>
+        <div class="pie-mapa">
+          <div class="escala-mapa"><div class="barra-escala" id="barra-escala"></div><span id="texto-escala"></span></div>
+          <span class="coordenadas-puntero" id="coordenadas-puntero" hidden></span>
+          <span class="atribucion">Datos: USGS. Límites: Natural Earth; Panamá Oeste figura dentro de Panamá.</span>
+        </div>
+        <div class="etiqueta-flotante" id="etiqueta-flotante" hidden></div>
+      </div>
+
+      <article class="ficha" id="ficha-detalle" data-abierta="false" aria-live="polite">
+        <p class="mensaje-vacio">Selecciona un sismo en la lista o en el mapa para ver su detalle.</p>
+      </article>
+    </section>
+  </div>
+</main>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.9.0/d3.min.js"></script>
+<script>
+(function () {
+  "use strict";
+
+  /* ---------- Datos fijos ---------- */
+  var ZONA_HORARIA_PANAMA = "America/Panama";
+  var RADIO_TERRESTRE_EN_KILOMETROS = 6371.0088;
+  var datosMapaBase = JSON.parse(document.getElementById("datos-mapa-base").textContent);
+  var movimientoReducido = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  var ciudades = [
+    { nombre: "Ciudad de Panamá", latitud: 8.9824, longitud: -79.5199, rango: 1 },
+    { nombre: "Colón", latitud: 9.3592, longitud: -79.9014, rango: 1 },
+    { nombre: "David", latitud: 8.4273, longitud: -82.4308, rango: 1 },
+    { nombre: "Santiago", latitud: 8.0989, longitud: -80.9772, rango: 2 },
+    { nombre: "Chitré", latitud: 7.9627, longitud: -80.4283, rango: 2 },
+    { nombre: "Las Tablas", latitud: 7.7623, longitud: -80.2757, rango: 2 },
+    { nombre: "Penonomé", latitud: 8.5189, longitud: -80.3572, rango: 2 },
+    { nombre: "La Chorrera", latitud: 8.8801, longitud: -79.7814, rango: 2 },
+    { nombre: "Puerto Armuelles", latitud: 8.2833, longitud: -82.8667, rango: 2 },
+    { nombre: "Changuinola", latitud: 9.4333, longitud: -82.5167, rango: 2 },
+    { nombre: "Bocas del Toro", latitud: 9.3403, longitud: -82.2417, rango: 2 },
+    { nombre: "La Palma", latitud: 8.4064, longitud: -78.1417, rango: 2 },
+    { nombre: "Aguadulce", latitud: 8.25, longitud: -80.55, rango: 3 },
+    { nombre: "Boquete", latitud: 8.7803, longitud: -82.4414, rango: 3 },
+    { nombre: "Arraiján", latitud: 8.9525, longitud: -79.6574, rango: 3 },
+    { nombre: "Tonosí", latitud: 7.4086, longitud: -80.4417, rango: 3 },
+    { nombre: "Pedasí", latitud: 7.5265, longitud: -80.0277, rango: 3 },
+    { nombre: "Macaracas", latitud: 7.7333, longitud: -80.55, rango: 3 },
+    { nombre: "Ocú", latitud: 7.9425, longitud: -80.7836, rango: 3 },
+    { nombre: "Guararé", latitud: 7.811, longitud: -80.2742, rango: 3 },
+    { nombre: "Soná", latitud: 8.0083, longitud: -81.3083, rango: 3 },
+    { nombre: "Santa Catalina", latitud: 7.6333, longitud: -81.25, rango: 3 },
+    { nombre: "Yaviza", latitud: 8.15, longitud: -77.6833, rango: 3 },
+    { nombre: "Metetí", latitud: 8.4833, longitud: -77.9667, rango: 3 },
+    { nombre: "Puerto Obaldía", latitud: 8.6667, longitud: -77.4167, rango: 3 },
+    { nombre: "El Porvenir", latitud: 9.5586, longitud: -78.9514, rango: 3 },
+    { nombre: "Portobelo", latitud: 9.5528, longitud: -79.6544, rango: 3 },
+    { nombre: "Garachiné", latitud: 8.0667, longitud: -78.3667, rango: 3 }
+  ];
+
+  var rotulosDeMar = [
+    { texto: "Mar Caribe", longitud: -80.6, latitud: 9.72 },
+    { texto: "Océano Pacífico", longitud: -82.1, latitud: 7.08 },
+    { texto: "Golfo de Panamá", longitud: -79.55, latitud: 8.0 },
+    { texto: "Golfo de Chiriquí", longitud: -82.25, latitud: 7.85 },
+    { texto: "Península de Azuero", longitud: -80.5, latitud: 7.62 }
+  ];
+  var rotulosDePaises = [
+    { texto: "Costa Rica", longitud: -83.1, latitud: 9.2, anclaje: "start" },
+    { texto: "Colombia", longitud: -77.05, latitud: 7.3, anclaje: "end" }
+  ];
+
+  var direccionesEnEspanol = {
+    N: "N", NNE: "NNE", NE: "NE", ENE: "ENE", E: "E", ESE: "ESE", SE: "SE", SSE: "SSE",
+    S: "S", SSW: "SSO", SW: "SO", WSW: "OSO", W: "O", WNW: "ONO", NW: "NO", NNW: "NNO"
+  };
+  var nombresDeAlertaPager = { green: "Verde", yellow: "Amarilla", orange: "Naranja", red: "Roja" };
+
+  /* ---------- Estado de la aplicación ---------- */
+  var estadoAplicacion = {
+    todosLosSismos: [],
+    sismoSeleccionadoId: null,
+    magnitudMinimaDelFiltro: 0,
+    ordenDeLaLista: "recientes",
+    sincronizacion: null,
+    baseDeDatosDisponible: null,
+    vistaMovil: "mapa",
+    primeraCargaCompleta: false
+  };
+
+  /* ---------- Utilidades ---------- */
+  function crearElemento(etiqueta, propiedades) {
+    var elemento = document.createElement(etiqueta);
+    if (propiedades) {
+      Object.keys(propiedades).forEach(function (clave) {
+        var valor = propiedades[clave];
+        if (valor === null || valor === undefined || valor === false) return;
+        if (clave === "clase") elemento.className = valor;
+        else if (clave === "texto") elemento.textContent = valor;
+        else if (clave.indexOf("on") === 0 && typeof valor === "function") elemento.addEventListener(clave.slice(2), valor);
+        else elemento.setAttribute(clave, valor === true ? "" : String(valor));
+      });
+    }
+    for (var indice = 2; indice < arguments.length; indice++) {
+      var hijo = arguments[indice];
+      if (hijo !== null && hijo !== undefined) elemento.append(hijo);
+    }
+    return elemento;
+  }
+
+  var espacioDeNombresSvg = "http://www.w3.org/2000/svg";
+  function crearElementoSvg(etiqueta, atributos) {
+    var elemento = document.createElementNS(espacioDeNombresSvg, etiqueta);
+    if (atributos) {
+      Object.keys(atributos).forEach(function (clave) {
+        elemento.setAttribute(clave, String(atributos[clave]));
+      });
+    }
+    return elemento;
+  }
+
+  function vaciarElemento(elemento) {
+    while (elemento.firstChild) elemento.removeChild(elemento.firstChild);
+  }
+
+  function claseDeMagnitud(magnitud) {
+    if (magnitud >= 7) return 7;
+    if (magnitud >= 6) return 6;
+    if (magnitud >= 5) return 5;
+    return 4;
+  }
+
+  function formatearMagnitud(magnitud) {
+    return magnitud.toFixed(1);
+  }
+
+  function radioDelSismoEnPixeles(magnitud) {
+    return 2 + 3 * Math.pow(Math.max(magnitud - 3, 0.4), 1.15);
+  }
+
+  function numeroRomano(numero) {
+    var simbolos = ["", "I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX", "X", "XI", "XII"];
+    var redondeado = Math.round(numero);
+    return simbolos[Math.max(0, Math.min(12, redondeado))] || "";
+  }
+
+  var formateadorFechaHoraLocal = new Intl.DateTimeFormat("es-PA", {
+    timeZone: ZONA_HORARIA_PANAMA, day: "numeric", month: "short", hour: "numeric", minute: "2-digit", hour12: true
+  });
+  var formateadorFechaLarga = new Intl.DateTimeFormat("es-PA", {
+    timeZone: ZONA_HORARIA_PANAMA, day: "numeric", month: "long", year: "numeric"
+  });
+  var formateadorHoraCompleta = new Intl.DateTimeFormat("es-PA", {
+    timeZone: ZONA_HORARIA_PANAMA, hour: "numeric", minute: "2-digit", second: "2-digit", hour12: true
+  });
+  var formateadorUtc = new Intl.DateTimeFormat("es-PA", {
+    timeZone: "UTC", day: "numeric", month: "short", hour: "2-digit", minute: "2-digit", second: "2-digit", hour12: false
+  });
+
+  function formatearDuracion(milisegundos) {
+    var minutosTotales = Math.max(0, Math.round(milisegundos / 60000));
+    if (minutosTotales < 1) return "menos de 1 min";
+    if (minutosTotales < 60) return minutosTotales + " min";
+    var horasTotales = Math.floor(minutosTotales / 60);
+    var minutosRestantes = minutosTotales % 60;
+    if (horasTotales < 48) return horasTotales + " h" + (minutosRestantes ? " " + minutosRestantes + " min" : "");
+    var dias = Math.floor(horasTotales / 24);
+    var horasRestantes = horasTotales % 24;
+    return dias + " d" + (horasRestantes ? " " + horasRestantes + " h" : "");
+  }
+
+  function formatearHaceCuanto(instante) {
+    var diferencia = Date.now() - instante;
+    if (diferencia < 60000) return "hace un momento";
+    return "hace " + formatearDuracion(diferencia);
+  }
+
+  function traducirLugar(textoOriginal) {
+    if (!textoOriginal) return "Ubicación sin nombre";
+    var coincidencia = /^(\d+(?:\.\d+)?) km ([NSEW]{1,3}) of (.+?)(?:, (.+))?$/.exec(textoOriginal);
+    if (!coincidencia) return textoOriginal;
+    var direccion = direccionesEnEspanol[coincidencia[2]] || coincidencia[2];
+    var pais = coincidencia[4];
+    var sufijo = pais && pais !== "Panama" ? ", " + pais : "";
+    return coincidencia[1] + " km al " + direccion + " de " + coincidencia[3] + sufijo;
+  }
+
+  function distanciaEnKilometros(latitudA, longitudA, latitudB, longitudB) {
+    var aRadianes = Math.PI / 180;
+    var deltaLatitud = (latitudB - latitudA) * aRadianes;
+    var deltaLongitud = (longitudB - longitudA) * aRadianes;
+    var componente = Math.sin(deltaLatitud / 2) * Math.sin(deltaLatitud / 2) +
+      Math.cos(latitudA * aRadianes) * Math.cos(latitudB * aRadianes) * Math.sin(deltaLongitud / 2) * Math.sin(deltaLongitud / 2);
+    return 2 * RADIO_TERRESTRE_EN_KILOMETROS * Math.asin(Math.min(1, Math.sqrt(componente)));
+  }
+
+  function rumboEnEspanol(latitudOrigen, longitudOrigen, latitudDestino, longitudDestino) {
+    var aRadianes = Math.PI / 180;
+    var deltaLongitud = (longitudDestino - longitudOrigen) * aRadianes;
+    var y = Math.sin(deltaLongitud) * Math.cos(latitudDestino * aRadianes);
+    var x = Math.cos(latitudOrigen * aRadianes) * Math.sin(latitudDestino * aRadianes) -
+      Math.sin(latitudOrigen * aRadianes) * Math.cos(latitudDestino * aRadianes) * Math.cos(deltaLongitud);
+    var grados = (Math.atan2(y, x) / aRadianes + 360) % 360;
+    var puntos = ["N", "NE", "E", "SE", "S", "SO", "O", "NO"];
+    return puntos[Math.round(grados / 45) % 8];
+  }
+
+  function ciudadMasCercana(latitud, longitud) {
+    var mejor = null;
+    ciudades.forEach(function (ciudad) {
+      var distancia = distanciaEnKilometros(latitud, longitud, ciudad.latitud, ciudad.longitud);
+      if (!mejor || distancia < mejor.distancia) mejor = { ciudad: ciudad, distancia: distancia };
+    });
+    return mejor;
+  }
+
+  function formatearCoordenadas(latitud, longitud) {
+    return Math.abs(latitud).toFixed(4) + "° " + (latitud >= 0 ? "N" : "S") + ", " +
+      Math.abs(longitud).toFixed(4) + "° " + (longitud >= 0 ? "E" : "O");
+  }
+
+  /* ---------- Datos derivados ---------- */
+  function normalizarSismo(documento) {
+    var datos = documento.data();
+    if (!datos) return null;
+    var sismo = {
+      id: documento.id,
+      magnitud: Number(datos.magnitud),
+      tipoDeMagnitud: datos.tipoDeMagnitud || null,
+      lugarOriginal: typeof datos.lugar === "string" ? datos.lugar : "",
+      instante: Number(datos.instanteEnMilisegundos),
+      latitud: Number(datos.latitud),
+      longitud: Number(datos.longitud),
+      profundidad: datos.profundidadEnKilometros === null || datos.profundidadEnKilometros === undefined ? NaN : Number(datos.profundidadEnKilometros),
+      reportesSentidos: Number.isFinite(Number(datos.reportesSentidos)) && datos.reportesSentidos !== null ? Number(datos.reportesSentidos) : null,
+      intensidadPorReportes: Number.isFinite(Number(datos.intensidadPorReportes)) && datos.intensidadPorReportes !== null ? Number(datos.intensidadPorReportes) : null,
+      intensidadInstrumental: Number.isFinite(Number(datos.intensidadInstrumentalMaxima)) && datos.intensidadInstrumentalMaxima !== null ? Number(datos.intensidadInstrumentalMaxima) : null,
+      alertaPager: typeof datos.alertaPager === "string" ? datos.alertaPager : null,
+      estadoDeRevision: datos.estadoDeRevision || null,
+      marcaDeTsunami: Number(datos.marcaDeTsunami) === 1,
+      cantidadDeEstaciones: Number.isFinite(Number(datos.cantidadDeEstaciones)) && datos.cantidadDeEstaciones !== null ? Number(datos.cantidadDeEstaciones) : null
+    };
+    var camposNumericosObligatorios = [sismo.magnitud, sismo.instante, sismo.latitud, sismo.longitud];
+    if (!camposNumericosObligatorios.every(Number.isFinite)) return null;
+    sismo.lugar = traducirLugar(sismo.lugarOriginal);
+    return sismo;
+  }
+
+  function obtenerSismoPrincipal() {
+    var principal = null;
+    estadoAplicacion.todosLosSismos.forEach(function (sismo) {
+      if (!principal || sismo.magnitud > principal.magnitud ||
+        (sismo.magnitud === principal.magnitud && sismo.instante < principal.instante)) principal = sismo;
+    });
+    return principal;
+  }
+
+  function obtenerInstanteInicial() {
+    var instanteInicial = Infinity;
+    estadoAplicacion.todosLosSismos.forEach(function (sismo) {
+      if (sismo.instante < instanteInicial) instanteInicial = sismo.instante;
+    });
+    return Number.isFinite(instanteInicial) ? instanteInicial : null;
+  }
+
+  function obtenerSismosFiltrados() {
+    return estadoAplicacion.todosLosSismos.filter(function (sismo) {
+      return sismo.magnitud >= estadoAplicacion.magnitudMinimaDelFiltro;
+    });
+  }
+
+  function obtenerSismosOrdenados() {
+    var lista = obtenerSismosFiltrados().slice();
+    var orden = estadoAplicacion.ordenDeLaLista;
+    lista.sort(function (a, b) {
+      if (orden === "magnitud") return b.magnitud - a.magnitud || a.instante - b.instante;
+      if (orden === "antiguos") return a.instante - b.instante;
+      return b.instante - a.instante;
+    });
+    return lista;
+  }
+
+  function obtenerSismoPorId(identificador) {
+    for (var indice = 0; indice < estadoAplicacion.todosLosSismos.length; indice++) {
+      if (estadoAplicacion.todosLosSismos[indice].id === identificador) return estadoAplicacion.todosLosSismos[indice];
+    }
+    return null;
+  }
+
+  /* ---------- Resumen y sincronización ---------- */
+  function renderizarResumen() {
+    var contenedor = document.getElementById("resumen-secuencia");
+    vaciarElemento(contenedor);
+    var sismos = estadoAplicacion.todosLosSismos;
+    if (!sismos.length) return;
+    var principal = obtenerSismoPrincipal();
+    var cantidadDeSeisOMas = sismos.filter(function (s) { return s.magnitud >= 6; }).length;
+    var cantidadDeCincoOMas = sismos.filter(function (s) { return s.magnitud >= 5; }).length;
+    var ultimo = sismos.reduce(function (a, b) { return b.instante > a.instante ? b : a; });
+    function elementoResumen(valor, texto) {
+      return crearElemento("li", null, crearElemento("strong", { texto: valor }), " " + texto);
+    }
+    contenedor.append(
+      elementoResumen(String(sismos.length), "sismos desde el principal"),
+      elementoResumen("M" + formatearMagnitud(principal.magnitud), "el mayor"),
+      elementoResumen(String(cantidadDeSeisOMas), "de M6 o más"),
+      elementoResumen(String(cantidadDeCincoOMas), "de M5 o más"),
+      elementoResumen(formatearHaceCuanto(ultimo.instante).replace("hace ", ""), "desde el último")
+    );
+    document.getElementById("subtitulo-secuencia").textContent =
+      "Secuencia del sismo M" + formatearMagnitud(principal.magnitud) + " del " + formateadorFechaLarga.format(principal.instante) +
+      ", " + formateadorHoraCompleta.format(principal.instante) + " (hora de Panamá)";
+  }
+
+  function renderizarEstadoDeSincronizacion() {
+    var contenedor = document.getElementById("estado-sincronizacion");
+    var texto = document.getElementById("texto-sincronizacion");
+    if (estadoAplicacion.baseDeDatosDisponible === false) {
+      contenedor.setAttribute("data-nivel", "antiguo");
+      texto.textContent = "No se pudo conectar con USGS";
+      return;
+    }
+    var sincronizacion = estadoAplicacion.sincronizacion;
+    if (!sincronizacion || !Number.isFinite(sincronizacion.instante)) {
+      contenedor.setAttribute("data-nivel", "desconocido");
+      texto.textContent = estadoAplicacion.primeraCargaCompleta ? "Fuente USGS · sin fecha de actualización" : "Conectando con USGS…";
+      return;
+    }
+    var antiguedad = Date.now() - sincronizacion.instante;
+    var nivel = antiguedad < 12 * 60000 ? "reciente" : antiguedad < 30 * 60000 ? "atrasado" : "antiguo";
+    contenedor.setAttribute("data-nivel", nivel);
+    texto.textContent = "USGS · actualizado " + formatearHaceCuanto(sincronizacion.instante) + " · cada 5 min";
+  }
+
+  /* ---------- Lista ---------- */
+  function renderizarLista() {
+    var lista = document.getElementById("lista-sismos");
+    var conteo = document.getElementById("conteo-lista");
+    vaciarElemento(lista);
+    var sismos = obtenerSismosOrdenados();
+    var principal = obtenerSismoPrincipal();
+    if (estadoAplicacion.baseDeDatosDisponible === false) {
+      conteo.textContent = "";
+      lista.append(crearElemento("li", null, crearElemento("p", { clase: "mensaje-vacio", texto: "No se pudo consultar USGS. Se reintentará automáticamente en unos minutos." })));
+      return;
+    }
+    if (!estadoAplicacion.todosLosSismos.length) {
+      conteo.textContent = "";
+      lista.append(crearElemento("li", null, crearElemento("p", {
+        clase: "mensaje-vacio",
+        texto: estadoAplicacion.primeraCargaCompleta ? "USGS no devolvió sismos para esta secuencia." : "Cargando sismos desde USGS…"
+      })));
+      return;
+    }
+    conteo.textContent = "Mostrando " + sismos.length + " de " + estadoAplicacion.todosLosSismos.length + " sismos";
+    if (!sismos.length) {
+      lista.append(crearElemento("li", null, crearElemento("p", { clase: "mensaje-vacio", texto: "Ningún sismo cumple el filtro elegido." })));
+      return;
+    }
+    var instanteInicial = obtenerInstanteInicial();
+    sismos.forEach(function (sismo) {
+      var esPrincipal = principal && sismo.id === principal.id;
+      var datosSecundarios = formateadorFechaHoraLocal.format(sismo.instante) + " · +" + formatearDuracion(sismo.instante - instanteInicial);
+      if (Number.isFinite(sismo.profundidad)) datosSecundarios += " · " + sismo.profundidad.toFixed(0) + " km prof.";
+      var boton = crearElemento("button", {
+        type: "button", clase: "sismo", "data-clase": claseDeMagnitud(sismo.magnitud), "data-id": sismo.id,
+        "aria-current": sismo.id === estadoAplicacion.sismoSeleccionadoId ? "true" : "false",
+        onclick: function () { seleccionarSismo(sismo.id, { origen: "lista" }); }
+      },
+        crearElemento("span", { clase: "sismo-magnitud", texto: formatearMagnitud(sismo.magnitud) }),
+        crearElemento("span", { clase: "sismo-texto" },
+          crearElemento("span", { clase: "sismo-lugar", texto: sismo.lugar }),
+          crearElemento("span", { clase: "sismo-datos", texto: datosSecundarios })),
+        esPrincipal ? crearElemento("span", { clase: "etiqueta-principal", texto: "Principal" }) : null
+      );
+      lista.append(crearElemento("li", null, boton));
+    });
+  }
+
+  function marcarSeleccionEnLista(desplazar) {
+    var botones = document.querySelectorAll("#lista-sismos .sismo");
+    botones.forEach(function (boton) {
+      var activo = boton.getAttribute("data-id") === estadoAplicacion.sismoSeleccionadoId;
+      boton.setAttribute("aria-current", activo ? "true" : "false");
+      if (activo && desplazar) boton.scrollIntoView({ block: "nearest" });
+    });
+  }
+
+  /* ---------- Gráfico de la secuencia ---------- */
+  function renderizarGraficoDeSecuencia() {
+    var contenedor = document.getElementById("grafico-secuencia");
+    var ancho = contenedor.clientWidth;
+    if (!ancho) return;
+    vaciarElemento(contenedor);
+    var visibles = obtenerSismosFiltrados();
+    var instanteInicial = obtenerInstanteInicial();
+    if (!visibles.length || instanteInicial === null) {
+      contenedor.append(crearElemento("p", { clase: "mensaje-vacio", texto: "Sin sismos para graficar.", style: "padding:10px 0" }));
+      return;
+    }
+    var alto = 112;
+    var margen = { izquierda: 30, derecha: 10, superior: 8, inferior: 22 };
+    var ultimoInstante = estadoAplicacion.todosLosSismos.reduce(function (maximo, s) { return Math.max(maximo, s.instante); }, instanteInicial);
+    var instanteFinal = Math.max(Date.now(), ultimoInstante);
+    var duracion = Math.max(instanteFinal - instanteInicial, 3600000);
+    var magnitudes = estadoAplicacion.todosLosSismos.map(function (s) { return s.magnitud; });
+    var minimoEje = Math.floor(Math.min.apply(null, magnitudes.concat([4]))) - 0.5;
+    var maximoEje = Math.max(8, Math.ceil(Math.max.apply(null, magnitudes)));
+    function escalaX(instante) { return margen.izquierda + ((instante - instanteInicial) / duracion) * (ancho - margen.izquierda - margen.derecha); }
+    function escalaY(magnitud) { return margen.superior + (1 - (magnitud - minimoEje) / (maximoEje - minimoEje)) * (alto - margen.superior - margen.inferior); }
+
+    var svg = crearElementoSvg("svg", { width: ancho, height: alto, viewBox: "0 0 " + ancho + " " + alto, role: "img", "aria-label": "Magnitud de cada sismo según el tiempo transcurrido desde el sismo principal" });
+    for (var magnitudEje = Math.ceil(minimoEje); magnitudEje <= maximoEje; magnitudEje++) {
+      svg.append(crearElementoSvg("line", { class: "linea-rejilla", x1: margen.izquierda, x2: ancho - margen.derecha, y1: escalaY(magnitudEje), y2: escalaY(magnitudEje) }));
+      var rotuloY = crearElementoSvg("text", { x: margen.izquierda - 5, y: escalaY(magnitudEje) + 3, "text-anchor": "end" });
+      rotuloY.textContent = "M" + magnitudEje;
+      svg.append(rotuloY);
+    }
+    var horasDeDuracion = duracion / 3600000;
+    var pasosCandidatos = [1, 2, 3, 6, 12, 24, 48, 72, 168, 336];
+    var pasoEnHoras = pasosCandidatos[pasosCandidatos.length - 1];
+    for (var indicePaso = 0; indicePaso < pasosCandidatos.length; indicePaso++) {
+      if (horasDeDuracion / pasosCandidatos[indicePaso] <= 6) { pasoEnHoras = pasosCandidatos[indicePaso]; break; }
+    }
+    for (var horas = 0; horas <= horasDeDuracion; horas += pasoEnHoras) {
+      var rotuloX = crearElementoSvg("text", { x: escalaX(instanteInicial + horas * 3600000), y: alto - 6, "text-anchor": horas === 0 ? "start" : "middle" });
+      rotuloX.textContent = horas === 0 ? "0" : horas >= 48 ? "+" + Math.round(horas / 24) + " d" : "+" + horas + " h";
+      svg.append(rotuloX);
+    }
+    var ordenadosPorMagnitud = visibles.slice().sort(function (a, b) { return a.magnitud - b.magnitud; });
+    ordenadosPorMagnitud.forEach(function (sismo) {
+      var x = escalaX(sismo.instante);
+      var yCabeza = escalaY(sismo.magnitud);
+      var seleccionado = sismo.id === estadoAplicacion.sismoSeleccionadoId;
+      var grupo = crearElementoSvg("g", { "data-clase": claseDeMagnitud(sismo.magnitud), tabindex: 0, role: "button", "aria-label": "M" + formatearMagnitud(sismo.magnitud) + ", " + sismo.lugar });
+      var titulo = crearElementoSvg("title");
+      titulo.textContent = "M" + formatearMagnitud(sismo.magnitud) + " · " + sismo.lugar + " · " + formateadorFechaHoraLocal.format(sismo.instante);
+      grupo.append(titulo);
+      grupo.append(crearElementoSvg("line", { class: "zona-click", x1: x, x2: x, y1: escalaY(minimoEje), y2: yCabeza }));
+      grupo.append(crearElementoSvg("line", { class: "tallo", x1: x, x2: x, y1: escalaY(minimoEje), y2: yCabeza }));
+      grupo.append(crearElementoSvg("circle", { class: "cabeza" + (seleccionado ? " seleccionado" : ""), cx: x, cy: yCabeza, r: seleccionado ? 5 : 3.2 }));
+      grupo.addEventListener("click", function () { seleccionarSismo(sismo.id, { origen: "grafico" }); });
+      grupo.addEventListener("keydown", function (evento) {
+        if (evento.key === "Enter" || evento.key === " ") { evento.preventDefault(); seleccionarSismo(sismo.id, { origen: "grafico" }); }
+      });
+      svg.append(grupo);
+    });
+    contenedor.append(svg);
+  }
+
+  /* ---------- Ficha de detalle ---------- */
+  function filaDeDato(etiqueta, contenido, extra) {
+    var valor = crearElemento("dd", extra || null);
+    if (contenido instanceof Node) valor.append(contenido); else valor.textContent = contenido;
+    return crearElemento("div", null, crearElemento("dt", { texto: etiqueta }), valor);
+  }
+
+  function renderizarDetalle() {
+    var ficha = document.getElementById("ficha-detalle");
+    var abiertaPreviamente = ficha.getAttribute("data-abierta") === "true";
+    vaciarElemento(ficha);
+    var sismo = obtenerSismoPorId(estadoAplicacion.sismoSeleccionadoId);
+    if (!sismo) {
+      ficha.append(crearElemento("p", { clase: "mensaje-vacio", texto: estadoAplicacion.todosLosSismos.length ? "Selecciona un sismo en la lista o en el mapa para ver su detalle." : "El detalle aparecerá cuando haya sismos cargados." }));
+      return;
+    }
+    var principal = obtenerSismoPrincipal();
+    var esPrincipal = principal && principal.id === sismo.id;
+    var instanteInicial = obtenerInstanteInicial();
+    var listaVisible = obtenerSismosOrdenados();
+    var posicion = listaVisible.findIndex(function (s) { return s.id === sismo.id; });
+
+    ficha.setAttribute("data-abierta", abiertaPreviamente ? "true" : "false");
+    ficha.setAttribute("data-clase", claseDeMagnitud(sismo.magnitud));
+
+    var cabecera = crearElemento("div", { clase: "ficha-cabecera" },
+      crearElemento("div", { clase: "ficha-magnitud" }, formatearMagnitud(sismo.magnitud), crearElemento("small", { texto: sismo.tipoDeMagnitud ? "M" + sismo.tipoDeMagnitud : "MAGNITUD" })),
+      crearElemento("div", null,
+        crearElemento("h2", { clase: "ficha-titulo", texto: (esPrincipal ? "Sismo principal · " : "") + sismo.lugar }),
+        crearElemento("p", { clase: "ficha-hora", texto: formateadorFechaHoraLocal.format(sismo.instante) + " (hora de Panamá) · " + formatearHaceCuanto(sismo.instante) })),
+      crearElemento("div", { clase: "ficha-acciones" },
+        crearElemento("button", { type: "button", "aria-label": "Sismo anterior en la lista", disabled: posicion <= 0, onclick: function () { if (posicion > 0) seleccionarSismo(listaVisible[posicion - 1].id, { origen: "lista" }); } }, "‹"),
+        crearElemento("button", { type: "button", "aria-label": "Sismo siguiente en la lista", disabled: posicion < 0 || posicion >= listaVisible.length - 1, onclick: function () { if (posicion >= 0 && posicion < listaVisible.length - 1) seleccionarSismo(listaVisible[posicion + 1].id, { origen: "lista" }); } }, "›"))
+    );
+
+    var distanciaAlPrincipal = principal && !esPrincipal ? distanciaEnKilometros(sismo.latitud, sismo.longitud, principal.latitud, principal.longitud) : null;
+    var rumboAlPrincipal = principal && !esPrincipal ? rumboEnEspanol(principal.latitud, principal.longitud, sismo.latitud, sismo.longitud) : null;
+    var cercana = ciudadMasCercana(sismo.latitud, sismo.longitud);
+    var rumboACiudad = rumboEnEspanol(cercana.ciudad.latitud, cercana.ciudad.longitud, sismo.latitud, sismo.longitud);
+
+    var elementoCoordenadas = crearElemento("span", { clase: "dato-mono", texto: formatearCoordenadas(sismo.latitud, sismo.longitud) });
+    var rejilla = crearElemento("dl", { clase: "rejilla-datos" });
+    rejilla.append(
+      filaDeDato("Hora local (Panamá)", formateadorFechaLarga.format(sismo.instante) + ", " + formateadorHoraCompleta.format(sismo.instante)),
+      filaDeDato("Hora UTC", formateadorUtc.format(sismo.instante)),
+      filaDeDato("Tiempo desde el principal", esPrincipal ? "Es el sismo principal" : "+" + formatearDuracion(sismo.instante - instanteInicial)),
+      filaDeDato("Profundidad", Number.isFinite(sismo.profundidad) ? sismo.profundidad.toFixed(1) + " km" : "Sin dato"),
+      filaDeDato("Coordenadas", elementoCoordenadas),
+      filaDeDato("Distancia al principal", esPrincipal ? "No aplica" : distanciaAlPrincipal.toFixed(0) + " km al " + rumboAlPrincipal),
+      filaDeDato("Ciudad más cercana", cercana.ciudad.nombre + ", a " + cercana.distancia.toFixed(0) + " km (el sismo queda al " + rumboACiudad + ")")
+    );
+    if (sismo.reportesSentidos !== null) {
+      rejilla.append(filaDeDato("Reportes de personas que lo sintieron", String(sismo.reportesSentidos)));
+    }
+    if (sismo.intensidadInstrumental !== null) {
+      rejilla.append(filaDeDato("Intensidad instrumental máxima (Mercalli)", numeroRomano(sismo.intensidadInstrumental) + " (" + sismo.intensidadInstrumental.toFixed(1) + ")"));
+    }
+    if (sismo.intensidadPorReportes !== null && sismo.intensidadPorReportes > 0 && sismo.reportesSentidos > 0) {
+      rejilla.append(filaDeDato("Intensidad según reportes (Mercalli)", numeroRomano(sismo.intensidadPorReportes) + " (" + sismo.intensidadPorReportes.toFixed(1) + ")"));
+    }
+    var claveDeAlerta = sismo.alertaPager && nombresDeAlertaPager[sismo.alertaPager] ? sismo.alertaPager : "none";
+    rejilla.append(
+      filaDeDato("Alerta PAGER de USGS", crearElemento("span", { clase: "pastilla", "data-alerta": claveDeAlerta, texto: claveDeAlerta === "none" ? "Sin alerta" : nombresDeAlertaPager[claveDeAlerta] })),
+      filaDeDato("Marca de tsunami de USGS", sismo.marcaDeTsunami ? "Región oceánica (la marca no confirma que haya habido tsunami)" : "Sin marca"),
+      filaDeDato("Estado del dato", sismo.estadoDeRevision === "reviewed" ? "Revisado por analistas" : sismo.estadoDeRevision === "automatic" ? "Automático, puede cambiar" : "Sin dato"),
+      filaDeDato("Estaciones usadas", sismo.cantidadDeEstaciones !== null ? String(sismo.cantidadDeEstaciones) : "Sin dato"),
+      filaDeDato("Descripción original de USGS", sismo.lugarOriginal || "Sin dato")
+    );
+
+    var botonCopiar = crearElemento("button", { type: "button", texto: "Copiar coordenadas" });
+    botonCopiar.addEventListener("click", function () { copiarTexto(sismo.latitud.toFixed(4) + ", " + sismo.longitud.toFixed(4), botonCopiar, elementoCoordenadas); });
+    var acciones = crearElemento("div", { clase: "acciones-ficha" }, botonCopiar);
+    if (/^[a-z0-9]+$/i.test(sismo.id)) {
+      acciones.append(crearElemento("a", { href: "https://earthquake.usgs.gov/earthquakes/eventpage/" + sismo.id, target: "_blank", rel: "noopener noreferrer", texto: "Ver en USGS ↗" }));
+    }
+    var botonDetalleMovil = crearElemento("button", { type: "button", clase: "boton-detalle-movil", texto: abiertaPreviamente ? "Ocultar detalles" : "Ver detalles" });
+    botonDetalleMovil.addEventListener("click", function () {
+      var abierta = ficha.getAttribute("data-abierta") === "true";
+      ficha.setAttribute("data-abierta", abierta ? "false" : "true");
+      botonDetalleMovil.textContent = abierta ? "Ver detalles" : "Ocultar detalles";
+    });
+    var cuerpo = crearElemento("div", { clase: "ficha-cuerpo" }, rejilla, acciones);
+    ficha.append(cabecera, botonDetalleMovil, cuerpo);
+  }
+
+  function copiarTexto(texto, boton, elementoParaSeleccionar) {
+    var textoOriginal = "Copiar coordenadas";
+    function restaurar() { setTimeout(function () { boton.textContent = textoOriginal; }, 1800); }
+    function alternativa() {
+      try {
+        var seleccion = window.getSelection();
+        seleccion.removeAllRanges();
+        var rango = document.createRange();
+        rango.selectNodeContents(elementoParaSeleccionar);
+        seleccion.addRange(rango);
+      } catch (error) { /* sin selección posible */ }
+      boton.textContent = "Selecciona y copia";
+      restaurar();
+    }
+    try {
+      navigator.clipboard.writeText(texto).then(function () { boton.textContent = "Copiado"; restaurar(); }, alternativa);
+    } catch (error) { alternativa(); }
+  }
+
+  /* ---------- Mapa ---------- */
+  var contenedorMapa = document.getElementById("contenedor-mapa");
+  var svgMapa = d3.select("#svg-mapa");
+  var proyeccion = d3.geoMercator();
+  var anchoMapa = 0;
+  var altoMapa = 0;
+  var transformacionActual = d3.zoomIdentity;
+  var grupoMapa = svgMapa.append("g").attr("id", "grupo-mapa");
+  var capaVecinos = grupoMapa.append("g");
+  var capaPanama = grupoMapa.append("g");
+  var capaRotulosMar = grupoMapa.append("g");
+  var capaRotulosProvincias = grupoMapa.append("g");
+  var capaCiudades = grupoMapa.append("g");
+  var capaSismos = grupoMapa.append("g");
+  var capaSeleccion = grupoMapa.append("g");
+
+  var divisionesPanama = datosMapaBase.features.filter(function (e) { return e.properties.pais === "Panamá"; });
+  var divisionesVecinas = datosMapaBase.features.filter(function (e) { return e.properties.pais !== "Panamá"; });
+
+  function calcularCentroDelPoligonoMayor(elemento) {
+    var poligonoMayor = null;
+    var areaMayor = -1;
+    elemento.geometry.coordinates.forEach(function (coordenadas) {
+      var poligono = { type: "Polygon", coordinates: coordenadas };
+      var area = d3.geoArea(poligono);
+      if (area > areaMayor) { areaMayor = area; poligonoMayor = poligono; }
+    });
+    return d3.geoCentroid(poligonoMayor);
+  }
+  divisionesPanama.forEach(function (elemento) { elemento.centroGeografico = calcularCentroDelPoligonoMayor(elemento); });
+
+  var generadorDeRutas = d3.geoPath(proyeccion);
+
+  var comportamientoDeZoom = d3.zoom()
+    .scaleExtent([1, 80])
+    .on("zoom", function (evento) { aplicarTransformacion(evento.transform); });
+  svgMapa.call(comportamientoDeZoom);
+
+  function posicionDelPunto(longitud, latitud) {
+    var punto = proyeccion([longitud, latitud]);
+    return punto || [0, 0];
+  }
+
+  function ajustarProyeccionAlContenedor() {
+    proyeccion.fitExtent([[8, 8], [anchoMapa - 8, altoMapa - 8]], {
+      type: "MultiPoint", coordinates: [[-83.25, 6.95], [-76.9, 9.85]]
+    });
+  }
+
+  function dibujarBaseDelMapa() {
+    capaVecinos.selectAll("path").data(divisionesVecinas).join("path").attr("class", "vecino").attr("d", generadorDeRutas);
+    capaPanama.selectAll("path").data(divisionesPanama).join("path")
+      .attr("class", "division")
+      .attr("d", generadorDeRutas)
+      .on("pointermove", function (evento, d) { mostrarEtiquetaFlotante(evento, d.properties.nombre + " · " + d.properties.tipo); })
+      .on("pointerleave", ocultarEtiquetaFlotante);
+
+    var rotulosMar = capaRotulosMar.selectAll("text").data(rotulosDeMar.map(function (r) { return Object.assign({ tipo: "mar" }, r); })
+      .concat(rotulosDePaises.map(function (r) { return Object.assign({ tipo: "pais" }, r); }))).join("text")
+      .attr("class", function (d) { return "rotulo " + (d.tipo === "pais" ? "rotulo-pais" : "rotulo-mar"); })
+      .attr("text-anchor", function (d) { return d.anclaje || "middle"; })
+      .text(function (d) { return d.texto; });
+    rotulosMar.each(function (d) {
+      var posicion = posicionDelPunto(d.longitud, d.latitud);
+      d.x = posicion[0]; d.y = posicion[1];
+    });
+    rotulosMar.attr("x", function (d) { return d.x; }).attr("y", function (d) { return d.y; });
+
+    capaRotulosProvincias.selectAll("text").data(divisionesPanama).join("text")
+      .attr("class", "rotulo rotulo-provincia")
+      .attr("text-anchor", "middle")
+      .text(function (d) { return d.properties.nombre; })
+      .each(function (d) { var p = posicionDelPunto(d.centroGeografico[0], d.centroGeografico[1]); d.x = p[0]; d.y = p[1]; })
+      .attr("x", function (d) { return d.x; }).attr("y", function (d) { return d.y; });
+
+    var grupoCiudades = capaCiudades.selectAll("g").data(ciudades).join(function (entrada) {
+      var grupo = entrada.append("g").attr("class", "ciudad");
+      grupo.append("circle").attr("class", "punto-ciudad");
+      grupo.append("text").attr("class", "rotulo rotulo-ciudad").attr("text-anchor", "start");
+      return grupo;
+    });
+    grupoCiudades.each(function (d) { var p = posicionDelPunto(d.longitud, d.latitud); d.x = p[0]; d.y = p[1]; });
+    grupoCiudades.select("text").text(function (d) { return d.nombre; });
+  }
+
+  function actualizarElementosSegunZoom() {
+    var factor = transformacionActual.k;
+    capaCiudades.selectAll("g.ciudad").each(function (d) {
+      var visible = d.rango === 1 || (d.rango === 2 && factor >= 2.2) || (d.rango === 3 && factor >= 4);
+      this.style.display = visible ? "" : "none";
+    });
+    capaCiudades.selectAll("circle.punto-ciudad").attr("cx", function (d) { return d.x; }).attr("cy", function (d) { return d.y; }).attr("r", 3 / factor);
+    capaCiudades.selectAll("text").attr("x", function (d) { return d.x + 6 / factor; }).attr("y", function (d) { return d.y + 3.5 / factor; })
+      .attr("font-size", 11 / factor).attr("stroke-width", 3 / factor);
+    capaRotulosProvincias.selectAll("text").attr("font-size", 10.5 / factor).attr("stroke-width", 3 / factor)
+      .style("display", factor <= 5 ? "" : "none");
+    capaRotulosMar.selectAll("text").attr("x", function (d) { return d.x; }).attr("y", function (d) { return d.y; })
+      .attr("font-size", function (d) { return (d.tipo === "pais" ? 11 : 11.5) / factor; })
+      .style("display", factor <= 8 ? "" : "none");
+    capaSismos.selectAll("circle.sismo-mapa").attr("r", function (d) { return radioDelSismoEnPixeles(d.magnitud) / factor; });
+    capaSeleccion.selectAll("circle").attr("r", function (d) { return radioDelSismoEnPixeles(d.magnitud) / factor + 5 / factor; });
+    capaSeleccion.selectAll("circle.onda-principal").attr("r", function (d) { return radioDelSismoEnPixeles(d.magnitud) / factor; });
+  }
+
+  function aplicarTransformacion(transformacion) {
+    transformacionActual = transformacion;
+    grupoMapa.attr("transform", transformacion.toString());
+    actualizarElementosSegunZoom();
+    actualizarEscala();
+  }
+
+  function actualizarEscala() {
+    if (!anchoMapa) return;
+    var puntoIzquierdo = proyeccion.invert(transformacionActual.invert([anchoMapa / 2 - 50, altoMapa / 2]));
+    var puntoDerecho = proyeccion.invert(transformacionActual.invert([anchoMapa / 2 + 50, altoMapa / 2]));
+    if (!puntoIzquierdo || !puntoDerecho) return;
+    var kilometrosPorPixel = distanciaEnKilometros(puntoIzquierdo[1], puntoIzquierdo[0], puntoDerecho[1], puntoDerecho[0]) / 100;
+    var candidatos = [1, 2, 5, 10, 20, 50, 100, 200, 500];
+    var elegido = candidatos[0];
+    candidatos.forEach(function (candidato) { if (candidato / kilometrosPorPixel <= 120) elegido = candidato; });
+    document.getElementById("barra-escala").style.width = Math.round(elegido / kilometrosPorPixel) + "px";
+    document.getElementById("texto-escala").textContent = elegido + " km";
+  }
+
+  function actualizarMarcadoresDelMapa() {
+    var visibles = obtenerSismosFiltrados().slice().sort(function (a, b) { return b.magnitud - a.magnitud; });
+    var circulos = capaSismos.selectAll("circle.sismo-mapa").data(visibles, function (d) { return d.id; }).join("circle")
+      .attr("class", "sismo-mapa")
+      .attr("data-clase", function (d) { return claseDeMagnitud(d.magnitud); })
+      .attr("tabindex", 0)
+      .attr("role", "button")
+      .attr("aria-label", function (d) { return "M" + formatearMagnitud(d.magnitud) + ", " + d.lugar; })
+      .each(function (d) { var p = posicionDelPunto(d.longitud, d.latitud); d.x = p[0]; d.y = p[1]; })
+      .attr("cx", function (d) { return d.x; })
+      .attr("cy", function (d) { return d.y; })
+      .on("click", function (evento, d) { seleccionarSismo(d.id, { origen: "mapa" }); })
+      .on("keydown", function (evento, d) { if (evento.key === "Enter" || evento.key === " ") { evento.preventDefault(); seleccionarSismo(d.id, { origen: "mapa" }); } })
+      .on("pointermove", function (evento, d) { mostrarEtiquetaFlotante(evento, "M" + formatearMagnitud(d.magnitud) + " · " + d.lugar + " · " + formateadorFechaHoraLocal.format(d.instante)); })
+      .on("pointerleave", ocultarEtiquetaFlotante);
+    circulos.order();
+    actualizarSeleccionEnMapa();
+    actualizarElementosSegunZoom();
+  }
+
+  function actualizarSeleccionEnMapa() {
+    var principal = obtenerSismoPrincipal();
+    var datosCapa = [];
+    var seleccionado = obtenerSismoPorId(estadoAplicacion.sismoSeleccionadoId);
+    if (principal) datosCapa.push({ tipo: "onda", sismo: principal });
+    if (seleccionado && obtenerSismosFiltrados().indexOf(seleccionado) !== -1) datosCapa.push({ tipo: "anillo", sismo: seleccionado });
+    capaSeleccion.selectAll("circle").data(datosCapa, function (d) { return d.tipo + d.sismo.id; }).join("circle")
+      .attr("class", function (d) { return d.tipo === "onda" ? "onda-principal" : "anillo-seleccion"; })
+      .each(function (d) { var p = posicionDelPunto(d.sismo.longitud, d.sismo.latitud); d.x = p[0]; d.y = p[1]; d.magnitud = d.sismo.magnitud; })
+      .attr("cx", function (d) { return d.x; })
+      .attr("cy", function (d) { return d.y; });
+    capaSeleccion.selectAll("circle").each(function (d) { d.magnitud = d.sismo.magnitud; });
+    actualizarElementosSegunZoom();
+  }
+
+  function transicionarA(transformacion, duracion) {
+    var seleccion = svgMapa;
+    if (!duracion || movimientoReducido) seleccion.call(comportamientoDeZoom.transform, transformacion);
+    else seleccion.transition().duration(duracion).call(comportamientoDeZoom.transform, transformacion);
+  }
+
+  function enfocarPuntos(puntos, factorMaximo) {
+    if (!puntos.length || !anchoMapa) return;
+    var xs = puntos.map(function (p) { return p[0]; });
+    var ys = puntos.map(function (p) { return p[1]; });
+    var minimoX = Math.min.apply(null, xs), maximoX = Math.max.apply(null, xs);
+    var minimoY = Math.min.apply(null, ys), maximoY = Math.max.apply(null, ys);
+    var ancho = Math.max(maximoX - minimoX, 30), alto = Math.max(maximoY - minimoY, 30);
+    var factor = Math.min(factorMaximo || 40, 0.78 / Math.max(ancho / anchoMapa, alto / altoMapa));
+    factor = Math.max(1, factor);
+    var transformacion = d3.zoomIdentity.translate(anchoMapa / 2, altoMapa / 2).scale(factor).translate(-(minimoX + maximoX) / 2, -(minimoY + maximoY) / 2);
+    transicionarA(transformacion, 650);
+  }
+
+  function enfocarSecuencia() {
+    var visibles = obtenerSismosFiltrados();
+    var fuente = visibles.length ? visibles : estadoAplicacion.todosLosSismos;
+    enfocarPuntos(fuente.map(function (s) { return posicionDelPunto(s.longitud, s.latitud); }), 12);
+  }
+
+  function centrarEnSismo(sismo) {
+    var punto = posicionDelPunto(sismo.longitud, sismo.latitud);
+    var factor = Math.max(transformacionActual.k, 4);
+    var transformacion = d3.zoomIdentity.translate(anchoMapa / 2, altoMapa / 2).scale(factor).translate(-punto[0], -punto[1]);
+    transicionarA(transformacion, 650);
+  }
+
+  function mostrarEtiquetaFlotante(evento, texto) {
+    var etiqueta = document.getElementById("etiqueta-flotante");
+    var posicion = d3.pointer(evento, contenedorMapa);
+    etiqueta.textContent = texto;
+    etiqueta.hidden = false;
+    var izquierda = Math.min(posicion[0] + 14, Math.max(0, anchoMapa - etiqueta.offsetWidth - 8));
+    var arriba = Math.min(posicion[1] + 16, Math.max(0, altoMapa - etiqueta.offsetHeight - 8));
+    etiqueta.style.left = Math.max(4, izquierda) + "px";
+    etiqueta.style.top = Math.max(4, arriba) + "px";
+  }
+  function ocultarEtiquetaFlotante() { document.getElementById("etiqueta-flotante").hidden = true; }
+
+  svgMapa.on("pointermove.coordenadas", function (evento) {
+    if (evento.pointerType === "touch") return;
+    var punto = d3.pointer(evento, svgMapa.node());
+    var geografico = proyeccion.invert(transformacionActual.invert(punto));
+    var indicador = document.getElementById("coordenadas-puntero");
+    if (!geografico) return;
+    indicador.hidden = false;
+    indicador.textContent = formatearCoordenadas(geografico[1], geografico[0]);
+  });
+  svgMapa.on("pointerleave.coordenadas", function () { document.getElementById("coordenadas-puntero").hidden = true; });
+
+  document.getElementById("acercar").addEventListener("click", function () {
+    svgMapa.transition().duration(movimientoReducido ? 0 : 250).call(comportamientoDeZoom.scaleBy, 1.8);
+  });
+  document.getElementById("alejar").addEventListener("click", function () {
+    svgMapa.transition().duration(movimientoReducido ? 0 : 250).call(comportamientoDeZoom.scaleBy, 1 / 1.8);
+  });
+  document.getElementById("ver-panama").addEventListener("click", function () { transicionarA(d3.zoomIdentity, 500); });
+  document.getElementById("ver-secuencia").addEventListener("click", enfocarSecuencia);
+
+  function redimensionarMapa() {
+    var nuevoAncho = contenedorMapa.clientWidth;
+    var nuevoAlto = contenedorMapa.clientHeight;
+    if (!nuevoAncho || !nuevoAlto) return;
+    if (nuevoAncho === anchoMapa && nuevoAlto === altoMapa) return;
+    anchoMapa = nuevoAncho;
+    altoMapa = nuevoAlto;
+    svgMapa.attr("width", anchoMapa).attr("height", altoMapa);
+    ajustarProyeccionAlContenedor();
+    comportamientoDeZoom
+      .extent([[0, 0], [anchoMapa, altoMapa]])
+      .translateExtent([[-anchoMapa * 0.6, -altoMapa * 0.6], [anchoMapa * 1.6, altoMapa * 1.6]]);
+    dibujarBaseDelMapa();
+    actualizarMarcadoresDelMapa();
+    aplicarTransformacion(transformacionActual);
+  }
+  new ResizeObserver(redimensionarMapa).observe(contenedorMapa);
+  new ResizeObserver(function () { renderizarGraficoDeSecuencia(); }).observe(document.getElementById("grafico-secuencia"));
+
+  /* ---------- Selección ---------- */
+  function seleccionarSismo(identificador, opciones) {
+    var sismo = obtenerSismoPorId(identificador);
+    if (!sismo) return;
+    var origen = opciones && opciones.origen;
+    estadoAplicacion.sismoSeleccionadoId = identificador;
+    marcarSeleccionEnLista(origen !== "lista");
+    renderizarDetalle();
+    actualizarSeleccionEnMapa();
+    renderizarGraficoDeSecuencia();
+    if (origen === "lista" || origen === "grafico") {
+      if (esVistaMovil()) establecerVistaMovil("mapa");
+      centrarEnSismo(sismo);
+    }
+  }
+
+  /* ---------- Vista móvil ---------- */
+  var consultaMovil = window.matchMedia("(max-width: 899px)");
+  function esVistaMovil() { return consultaMovil.matches; }
+  function establecerVistaMovil(vista) {
+    estadoAplicacion.vistaMovil = vista;
+    aplicarVistaMovil();
+  }
+  function aplicarVistaMovil() {
+    var panelLista = document.getElementById("panel-lista");
+    var panelMapa = document.getElementById("panel-mapa");
+    if (esVistaMovil()) {
+      panelLista.hidden = estadoAplicacion.vistaMovil !== "lista";
+      panelMapa.hidden = estadoAplicacion.vistaMovil !== "mapa";
+    } else {
+      panelLista.hidden = false;
+      panelMapa.hidden = false;
+    }
+    document.getElementById("pestana-mapa").setAttribute("aria-pressed", estadoAplicacion.vistaMovil === "mapa" ? "true" : "false");
+    document.getElementById("pestana-lista").setAttribute("aria-pressed", estadoAplicacion.vistaMovil === "lista" ? "true" : "false");
+  }
+  document.getElementById("pestana-mapa").addEventListener("click", function () { establecerVistaMovil("mapa"); });
+  document.getElementById("pestana-lista").addEventListener("click", function () { establecerVistaMovil("lista"); });
+  consultaMovil.addEventListener("change", aplicarVistaMovil);
+  aplicarVistaMovil();
+
+  /* ---------- Filtros ---------- */
+  document.querySelectorAll(".filtro").forEach(function (boton) {
+    boton.addEventListener("click", function () {
+      estadoAplicacion.magnitudMinimaDelFiltro = Number(boton.getAttribute("data-magnitud-minima"));
+      document.querySelectorAll(".filtro").forEach(function (otro) { otro.setAttribute("aria-pressed", otro === boton ? "true" : "false"); });
+      var seleccionado = obtenerSismoPorId(estadoAplicacion.sismoSeleccionadoId);
+      if (seleccionado && seleccionado.magnitud < estadoAplicacion.magnitudMinimaDelFiltro) estadoAplicacion.sismoSeleccionadoId = null;
+      renderizarTodo();
+    });
+  });
+  document.getElementById("selector-orden").addEventListener("change", function (evento) {
+    estadoAplicacion.ordenDeLaLista = evento.target.value;
+    renderizarLista();
+    marcarSeleccionEnLista(false);
+    renderizarDetalle();
+  });
+
+  function renderizarTodo() {
+    renderizarResumen();
+    renderizarLista();
+    renderizarDetalle();
+    renderizarGraficoDeSecuencia();
+    actualizarMarcadoresDelMapa();
+    renderizarEstadoDeSincronizacion();
+  }
+
+  /* ---------- Base de datos compartida ---------- */
+  function recibirSismos(instantanea) {
+    var sismos = [];
+    instantanea.docs.forEach(function (documento) {
+      var sismo = normalizarSismo(documento);
+      if (sismo) sismos.push(sismo);
+    });
+    var eraPrimeraCarga = !estadoAplicacion.primeraCargaCompleta;
+    estadoAplicacion.todosLosSismos = sismos;
+    estadoAplicacion.primeraCargaCompleta = true;
+    if (!obtenerSismoPorId(estadoAplicacion.sismoSeleccionadoId)) {
+      var principal = obtenerSismoPrincipal();
+      estadoAplicacion.sismoSeleccionadoId = principal ? principal.id : null;
+    }
+    renderizarTodo();
+    marcarSeleccionEnLista(false);
+    if (eraPrimeraCarga && sismos.length) {
+      if (esVistaMovil()) enfocarSecuencia();
+    }
+  }
+
+  /* ---------- Datos en vivo desde USGS ---------- */
+  var CONFIG = {
+    inicioDeLaSecuenciaIso: "2026-10-09T17:56:00",
+    latitudDelPrincipal: 7.5868,
+    longitudDelPrincipal: -80.769,
+    radioEnKilometros: 400,
+    magnitudMinima: 4,
+    intervaloEnMilisegundos: 5 * 60 * 1000
+  };
+  var consultaEnCurso = false;
+  var temporizadorDeActualizacion = null;
+
+  function urlDeConsulta() {
+    return "https://earthquake.usgs.gov/fdsnws/event/1/query?format=geojson&orderby=time&limit=2000" +
+      "&starttime=" + CONFIG.inicioDeLaSecuenciaIso +
+      "&latitude=" + CONFIG.latitudDelPrincipal + "&longitude=" + CONFIG.longitudDelPrincipal +
+      "&maxradiuskm=" + CONFIG.radioEnKilometros + "&minmagnitude=" + CONFIG.magnitudMinima;
+  }
+
+  function documentoDesdeFeature(feature) {
+    var p = feature.properties || {};
+    var coordenadas = (feature.geometry && feature.geometry.coordinates) || [];
+    var datos = {
+      magnitud: p.mag,
+      tipoDeMagnitud: p.magType,
+      lugar: p.place,
+      instanteEnMilisegundos: p.time,
+      longitud: coordenadas[0],
+      latitud: coordenadas[1],
+      profundidadEnKilometros: coordenadas[2],
+      reportesSentidos: p.felt,
+      intensidadPorReportes: p.cdi,
+      intensidadInstrumentalMaxima: p.mmi,
+      alertaPager: p.alert,
+      estadoDeRevision: p.status,
+      marcaDeTsunami: p.tsunami,
+      cantidadDeEstaciones: p.nst
+    };
+    return { id: feature.id, data: function () { return datos; } };
+  }
+
+  function actualizarDesdeUsgs() {
+    if (consultaEnCurso) return Promise.resolve();
+    consultaEnCurso = true;
+    return fetch(urlDeConsulta(), { cache: "no-store" })
+      .then(function (respuesta) {
+        if (!respuesta.ok) throw new Error("USGS respondió " + respuesta.status);
+        return respuesta.json();
+      })
+      .then(function (geojson) {
+        estadoAplicacion.baseDeDatosDisponible = true;
+        estadoAplicacion.sincronizacion = { instante: Date.now() };
+        recibirSismos({ docs: (geojson.features || []).map(documentoDesdeFeature) });
+      })
+      .catch(function () {
+        // Si ya hay datos, se conservan y el indicador envejece; si no, se avisa del error.
+        if (!estadoAplicacion.todosLosSismos.length) estadoAplicacion.baseDeDatosDisponible = false;
+        renderizarLista();
+        renderizarEstadoDeSincronizacion();
+      })
+      .then(function () { consultaEnCurso = false; });
+  }
+
+  /* ---------- Arranque ---------- */
+  renderizarLista();
+  renderizarDetalle();
+  renderizarEstadoDeSincronizacion();
+  actualizarDesdeUsgs();
+  temporizadorDeActualizacion = setInterval(actualizarDesdeUsgs, CONFIG.intervaloEnMilisegundos);
+  document.addEventListener("visibilitychange", function () {
+    if (document.visibilityState === "visible" && estadoAplicacion.sincronizacion &&
+      Date.now() - estadoAplicacion.sincronizacion.instante > CONFIG.intervaloEnMilisegundos) actualizarDesdeUsgs();
+  });
+
+  setInterval(function () {
+    renderizarResumen();
+    renderizarEstadoDeSincronizacion();
+    renderizarGraficoDeSecuencia();
+  }, 60000);
+})();
+</script>
+
+</body></html>
